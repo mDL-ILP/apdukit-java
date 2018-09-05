@@ -68,8 +68,8 @@ public class ResponseApdu implements Apdu {
 
     private void decodeData(ByteArrayInputStreamExtension stream) throws InvalidApduException {
         try {
-            boolean issetData = stream.available() > Constants.SIZE_RESPONSE_STATUS_CODE;
-            if(issetData){
+            boolean isDataAvailable = stream.available() > Constants.SIZE_RESPONSE_STATUS_CODE;
+            if(isDataAvailable){
                 this.data = stream.readBytes(stream.available() - Constants.SIZE_RESPONSE_STATUS_CODE);//Read all the data except the last two bytes which are reserved for the status code.
             }
         } catch (Exception e) {

@@ -1,6 +1,6 @@
 package com.ul.ims.apdu.encoding;
 
-import com.ul.ims.apdu.encoding.enums.ExpectedResultType;
+import com.ul.ims.apdu.encoding.enums.FileControlInfo;
 import com.ul.ims.apdu.encoding.enums.SelectFileType;
 import com.ul.ims.apdu.apps.ExampleApp;
 
@@ -25,7 +25,7 @@ public class SelectCommandParseTests {
         assertTrue(command instanceof SelectCommand);
         SelectCommand result = (SelectCommand) command;
         assertEquals(SelectFileType.DF, result.getFileType());
-        assertEquals(ExpectedResultType.NOTHING,result.getExpectedResult());
+        assertEquals(FileControlInfo.NOFCIReturn,result.getFileControlInfo());
         assertNotNull(result.getFileID());
         assertArrayEquals(ExampleApp.instance.ValidDF_NormalLength2.getValue(), result.getFileID().getValue());
     }
@@ -41,7 +41,7 @@ public class SelectCommandParseTests {
             assertTrue(command instanceof SelectCommand);
             SelectCommand result = (SelectCommand) command;
             assertEquals(SelectFileType.DF, result.getFileType());
-            assertEquals(ExpectedResultType.NOTHING, result.getExpectedResult());
+            assertEquals(FileControlInfo.NOFCIReturn, result.getFileControlInfo());
             assertArrayEquals(ExampleApp.instance.ValidDF_ExtendedLength.getValue(), result.getFileID().getValue());
         } catch (Exception e) {
             e.printStackTrace();
@@ -55,7 +55,7 @@ public class SelectCommandParseTests {
         assertTrue(command instanceof SelectCommand);
         SelectCommand result = (SelectCommand) command;
         assertEquals(SelectFileType.EF, result.getFileType());
-        assertEquals(ExpectedResultType.NOTHING,result.getExpectedResult());
+        assertEquals(FileControlInfo.NOFCIReturn,result.getFileControlInfo());
         assertArrayEquals(ExampleApp.instance.ValidEF_NoShortId.getNormalIdentifier(), result.getFileID().getValue());
     }
 

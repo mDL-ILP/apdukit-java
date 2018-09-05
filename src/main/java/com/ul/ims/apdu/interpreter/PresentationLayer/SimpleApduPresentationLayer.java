@@ -11,7 +11,7 @@ import com.ul.ims.apdu.encoding.ResponseApdu;
 import com.ul.ims.apdu.encoding.SelectCommand;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
-import com.ul.ims.apdu.encoding.enums.ExpectedResultType;
+import com.ul.ims.apdu.encoding.enums.FileControlInfo;
 import com.ul.ims.apdu.encoding.enums.SelectFileType;
 import com.ul.ims.apdu.encoding.enums.StatusCode;
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduFileException;
@@ -83,7 +83,7 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
     private Promise selectEF(final ElementaryFileID fileID) {
         SelectCommand command = new SelectCommand();
-        command.setExpectedResult(ExpectedResultType.NOTHING);
+        command.setFileControlInfo(FileControlInfo.NOFCIReturn);
         command.setFileID(fileID);
 
         return Promise.resolve(this.selectedEF == fileID)
@@ -102,7 +102,7 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
     private Promise selectDF(DedicatedFileID fileID) {
         SelectCommand command = new SelectCommand();
-        command.setExpectedResult(ExpectedResultType.NOTHING);
+        command.setFileControlInfo(FileControlInfo.NOFCIReturn);
         command.setFileID(fileID);
 
         return Promise.resolve(selectedApp == appId)
@@ -293,7 +293,7 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
         }
         //Check access
         if(delegate != null && !delegate.checkAccessConditions(id)) {
-            response.setStatusCode(StatusCode.ERROR_INVALID_SECURITY_STATUS);
+            response.setStatusCode(StatusCode.ERROR_SECURITY_STATUS_NOT_SATISFIED);
             return response;
         }
         this.selectedEF = id;//On read we also set the selectEF. For the case of a ReadBinaryShortFileIDCommand where we don't select before read.

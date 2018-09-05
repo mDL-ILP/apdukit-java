@@ -49,9 +49,9 @@ public abstract class CommandApdu implements Apdu {
             throw new ParseException("data should be at least 4 long");
         }
         stream.skip(1);//Skip instruction class.
-        InstructionCode instructionCode = InstructionCode.valueOf((byte)stream.readByte());
+        InstructionCode instructionCode = InstructionCode.valueOf(stream.readByte());
         if(instructionCode == null) {
-            return null;
+            throw new ParseException("Instruction code byte could not be mapped to the instructionCode enum");
         }
         stream.reset();
         switch (instructionCode) {

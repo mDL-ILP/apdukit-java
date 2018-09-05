@@ -19,7 +19,7 @@ public enum InstructionClass {
             map.put(type.value, type);
         }
     }
-    //Returns a InstructionCode for raw value byte.
+    //Returns a InstructionCode for a raw value byte.
     public static InstructionClass valueOf(byte type) {
         return (InstructionClass) map.get(type);
     }

@@ -10,7 +10,7 @@ import java.io.IOException;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 import com.ul.ims.apdu.encoding.enums.InstructionCode;
-import com.ul.ims.apdu.encoding.enums.ExpectedResultType;
+import com.ul.ims.apdu.encoding.enums.FileControlInfo;
 import com.ul.ims.apdu.encoding.enums.SelectFileType;
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.encoding.exceptions.ValueNotSetException;
@@ -20,7 +20,7 @@ import com.ul.ims.apdu.extensions.OutOfBytesException;
 
 public class SelectCommand extends CommandApdu {
     private SelectFileType fileType;
-    private ExpectedResultType expectedResult;
+    private FileControlInfo fileControlInfo;
     private FileID fileID;
 
     public SelectCommand() {
@@ -30,13 +30,13 @@ public class SelectCommand extends CommandApdu {
     public SelectCommand(ByteArrayInputStreamExtension stream) throws Exception {
         super(stream);
         this.fileType = SelectFileType.valueOf(stream.readByte());
-        this.expectedResult = ExpectedResultType.valueOf(stream.readByte());
+        this.fileControlInfo = FileControlInfo.valueOf(stream.readByte());
         this.decodeFileId(stream);
         validate();
     }
 
-    public SelectCommand setExpectedResult(ExpectedResultType expectedResult) {
-        this.expectedResult = expectedResult;
+    public SelectCommand setFileControlInfo(FileControlInfo expectedResult) {
+        this.fileControlInfo = expectedResult;
         return this;
     }
 
@@ -55,8 +55,8 @@ public class SelectCommand extends CommandApdu {
         return fileType;
     }
 
-    public ExpectedResultType getExpectedResult() {
-        return expectedResult;
+    public FileControlInfo getFileControlInfo() {
+        return fileControlInfo;
     }
 
     public FileID getFileID() {
@@ -82,8 +82,8 @@ public class SelectCommand extends CommandApdu {
         if(fileType == SelectFileType.DF && !(fileID instanceof DedicatedFileID) ) {
             throw new InvalidApduException("filetype does not match file id instance type");
         }
-        if(expectedResult == null) {
-            throw new ValueNotSetException("expectedResult");
+        if(fileControlInfo == null) {
+            throw new ValueNotSetException("fileControlInfo");
         }
     }
 
@@ -122,7 +122,7 @@ public class SelectCommand extends CommandApdu {
         this.validate();
         ByteArrayOutputStream stream = super.toBytes();
         stream.write(fileType.getValue()); //P1
-        stream.write(expectedResult.getValue()); //P2
+        stream.write(fileControlInfo.getValue()); //P2
         encodeFileId(stream);
         return stream;
     }
