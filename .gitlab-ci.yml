@@ -1,0 +1,32 @@
+image: gradle:4.9.0-jdk8
+
+stages:
+  - build
+  - test
+
+before_script:
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+
+cache:
+  paths:
+    - .gradle/wrapper
+    - .gradle/caches
+
+build:
+  stage: build
+  script:
+    - gradle assemble
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 1 week
+  only:
+    - master
+
+test:
+  stage: test
+  script:
+    - gradle check
+
+after_script:
+  - echo "End CI"
