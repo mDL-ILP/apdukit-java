@@ -23,7 +23,6 @@ public class HolderPresentationLayer implements PresentationLayer, HolderSession
     private HashMap<Short, ApduFile> files = new HashMap<>();
 
     private int maxExpLength = Constants.DEFAULT_MAX_EXPECTED_LENGTH_NOT_EXTENDED;
-//    Semaphore getFileLock = new Semaphore(1);
 
     private PresentationLayerDelegate delegate;
     //Config
@@ -216,11 +215,11 @@ public class HolderPresentationLayer implements PresentationLayer, HolderSession
 
     @Override
     public void onReceiveInvalidApdu(ParseException exception) {
-
+        exception.printStackTrace();
     }
 
     @Override
     public void onSendFailure(Exception exception) {
-
+        exception.printStackTrace();
     }
 }
