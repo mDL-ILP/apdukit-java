@@ -6,7 +6,6 @@ import java.io.IOException;
 import com.ul.ims.apdu.encoding.enums.InstructionClass;
 import com.ul.ims.apdu.encoding.enums.InstructionCode;
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
-import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.encoding.exceptions.ValueNotSetException;
 import com.ul.ims.apdu.extensions.ByteArrayInputStreamExtension;
@@ -43,13 +42,13 @@ public abstract class CommandApdu implements Apdu {
     /**
      * Apdu from bytes. Routes and initializes the right apdu subclass depending on the instructionCode
      */
-    public static CommandApdu fromBytes(byte[] buf) throws Exception {
+    public static CommandApdu fromBytes(byte[] buf) throws ParseException {
         ByteArrayInputStreamExtension stream = new ByteArrayInputStreamExtension(buf);
         if(stream.available() < 4) {
-            throw new ParseException("data should be at least 4 long");
+            throw new InvalidApduException("data should be at least 4 long");
         }
         stream.skip(1);//Skip instruction class.
-        InstructionCode instructionCode = InstructionCode.valueOf(stream.readByte());
+        InstructionCode instructionCode = InstructionCode.valueOf((byte)stream.readByte());
         if(instructionCode == null) {
             throw new ParseException("Instruction code byte could not be mapped to the instructionCode enum");
         }
@@ -68,7 +67,7 @@ public abstract class CommandApdu implements Apdu {
     /**
      * Apdu to bytes.
      */
-    public ByteArrayOutputStream toBytes() throws IOException, InvalidApduException, InvalidNumericException {
+    public ByteArrayOutputStream toBytes() throws IOException, InvalidApduException {
         this.validate();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         stream.write(instructionClass.getValue());

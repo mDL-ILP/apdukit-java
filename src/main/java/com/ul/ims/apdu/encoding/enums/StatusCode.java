@@ -27,7 +27,7 @@ public enum StatusCode {
     //Indicates a generic error.
     ERROR_UNKNOWN((short) 0x6F00),
     //Indicates that the security status isn't high enough.
-    ERROR_SECURITY_STATUS_NOT_SATISFIED((short) 0x6982);
+    ERROR_INVALID_SECURITY_STATUS((short) 0x6982);
 
     private static Map map = new HashMap<>();
     static {

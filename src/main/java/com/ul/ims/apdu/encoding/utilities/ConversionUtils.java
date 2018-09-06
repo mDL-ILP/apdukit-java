@@ -1,8 +1,11 @@
 package com.ul.ims.apdu.encoding.utilities;
 
+import com.sun.tools.javac.util.ArrayUtils;
 import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ConversionUtils {
     /**
@@ -42,10 +45,10 @@ public class ConversionUtils {
         final byte[] bits = new byte[8 * bytes.length];
         int bitsIndex = 0;
 
-        for (final byte bbyte : bytes) {
-            final byte[] bitsFromByte = toBitArray(bbyte);
+        for (final byte _byte : bytes) {
+            final byte[] bitsFromByte = toBitArray(_byte);
             System.arraycopy(bitsFromByte, 0, bits, bitsIndex, 8);
-            bitsIndex+=8;
+            bitsIndex +=8;
         }
 
         return bits;
@@ -76,7 +79,16 @@ public class ConversionUtils {
      * @return array of bits max 8 long.
      */
     public static byte[] byteToBits(byte b) {
-        return bytesToBits(new byte[]{b});
+        final byte[] result = new byte[8];
+        for (int i = 7; i > 0; i--) {
+            if((b & 1) == 1) {
+                result[i] = 1;
+            } else {
+                result[i] = 0;
+            }
+            b >>= 1;
+        }
+        return result;
     }
 
     /**

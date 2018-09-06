@@ -4,6 +4,7 @@ import com.ul.ims.apdu.encoding.enums.InstructionCode;
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
+import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 
 import com.ul.ims.apdu.encoding.utilities.ApduLengthUtils;
 import com.ul.ims.apdu.encoding.utilities.ConversionUtils;
@@ -14,7 +15,7 @@ import java.io.IOException;
 
 public abstract class ReadBinaryCommand extends CommandApdu {
 
-    int maximumExpectedLength = Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED;
+    short maximumExpectedLength = 0;//0 means EXTENDED_LENGTH.
 
     ReadBinaryCommand() {
         super(InstructionCode.READ_BINARY);
@@ -40,11 +41,11 @@ public abstract class ReadBinaryCommand extends CommandApdu {
         }
     }
 
-    protected void encodeMaxExpectedLength(ByteArrayOutputStream stream) throws IOException, InvalidNumericException {
+    protected void encodeMaxExpectedLength(ByteArrayOutputStream stream) throws IOException {
         stream.write(ApduLengthUtils.encodeMaxExpectedLength(this.maximumExpectedLength));
     }
 
-    static ReadBinaryCommand fromBytes(ByteArrayInputStreamExtension stream) throws Exception {
+    static ReadBinaryCommand fromBytes(ByteArrayInputStreamExtension stream) throws ParseException {
         stream.skip(2);//Skip the instruction class + instruction code
         byte fileIdFirstByte = stream.readByte();
         stream.reset();
@@ -54,11 +55,11 @@ public abstract class ReadBinaryCommand extends CommandApdu {
         return new ReadBinaryOffsetCommand(stream);
     }
 
-    public void setMaximumExpectedLength(int size) {
+    public void setMaximumExpectedLength(short size) {
         this.maximumExpectedLength = size;
     }
 
-    public int getMaximumExpectedLength() {
+    public short getMaximumExpectedLength() {
         return this.maximumExpectedLength;
     }
 

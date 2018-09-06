@@ -1,9 +1,7 @@
-package com.ul.ims.apdu.interpreter.TransportLayer;
-
-import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
+package com.ul.ims.apdu.interpreter.transportLayer;
 
 import java.io.IOException;
 
 public interface TransportLayerDelegate {
-    void onReceive(byte[] data) throws IOException, InvalidApduException;
+    void onReceive(byte[] data) throws IOException;
 }

@@ -1,7 +1,7 @@
 package com.ul.ims.apdu.encoding;
 
 import com.ul.ims.apdu.encoding.exceptions.InvalidElementaryFileId;
-import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
+import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.encoding.exceptions.ValueNotSetException;
@@ -18,7 +18,7 @@ public class ReadBinaryShortFileIDCommand extends ReadBinaryCommand {
 
     public ReadBinaryShortFileIDCommand() {super();}
 
-    ReadBinaryShortFileIDCommand(ByteArrayInputStreamExtension stream) throws Exception{
+    ReadBinaryShortFileIDCommand(ByteArrayInputStreamExtension stream) throws ParseException {
         super(stream);
         this.decodeElementaryFileID(stream);
         this.decodeOffset(stream);
@@ -38,7 +38,7 @@ public class ReadBinaryShortFileIDCommand extends ReadBinaryCommand {
         this.elementaryFileID = new ElementaryFileID(ConversionUtils.replaceBit8with0(stream.readByte()));
     }
 
-    private void encodeElementaryFileID(ByteArrayOutputStream stream) throws InvalidApduException {
+    private void encodeElementaryFileID(ByteArrayOutputStream stream) {
         stream.write(ConversionUtils.replaceBit8with1(elementaryFileID.getShortIdentifier()));
     }
 
@@ -51,7 +51,7 @@ public class ReadBinaryShortFileIDCommand extends ReadBinaryCommand {
     }
 
     @Override
-    public ByteArrayOutputStream toBytes() throws IOException, InvalidApduException, InvalidNumericException {
+    public ByteArrayOutputStream toBytes() throws IOException, InvalidApduException {
         this.validate();
         ByteArrayOutputStream stream = super.toBytes();
         this.encodeElementaryFileID(stream);

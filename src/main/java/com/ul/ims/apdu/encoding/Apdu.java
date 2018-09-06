@@ -1,7 +1,6 @@
 package com.ul.ims.apdu.encoding;
 
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
-import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,7 +8,7 @@ import java.io.IOException;
 /**
  * Application Protocol Data Unit
  */
-interface Apdu {
+public interface Apdu {
     /**
      * Validate Apdu. Each type will throw if values aren't set etc.
      */
@@ -18,6 +17,6 @@ interface Apdu {
     /**
      * Apdu to bytes.
      */
-    ByteArrayOutputStream toBytes() throws IOException, InvalidApduException, InvalidNumericException;
+    ByteArrayOutputStream toBytes() throws IOException, InvalidApduException;
 
 }

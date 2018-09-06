@@ -22,7 +22,7 @@ public class ApduLengthUtils {
      * @throws ParseException
      * @throws InvalidNumericException
      */
-    public static int decodeMaxExpectedLength(ByteArrayInputStreamExtension stream) throws ParseException {
+    public static short decodeMaxExpectedLength(ByteArrayInputStreamExtension stream) throws ParseException, InvalidNumericException {
         Byte firstByte = stream.readByte();
         Byte secondByte = stream.readByte();
         Byte thirdByte = stream.readByte();
@@ -41,7 +41,7 @@ public class ApduLengthUtils {
             }
             //If the two bytes are set to '0000', then Ne is 65 536.
             if (secondByte != null && secondByte == 0 && thirdByte == null) {
-                return Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED;
+                return (short) Constants.EXTENDED_LENGTH;
             }
         } else {
             //From '01' to 'FF', the byte encodes Nc from one to 255.
@@ -59,11 +59,11 @@ public class ApduLengthUtils {
      * @throws ParseException
      * @throws InvalidNumericException
      */
-    public static short decodeDataLength(ByteArrayInputStreamExtension stream) throws ParseException {
-        if(stream == null) {
-            throw new ParseException("Data length not provided");
-        }
+    public static short decodeDataLength(ByteArrayInputStreamExtension stream) throws ParseException, InvalidNumericException {
         Byte firstByte = stream.readByte();
+        if(firstByte == null) {
+            throw new ParseException("Not enough bytes given to read data length.");
+        }
         boolean isExtendedLength = firstByte == 0;
 
         short result = 0;//length
@@ -89,7 +89,7 @@ public class ApduLengthUtils {
      * @return byte array representing the given length.
      */
     public static byte[] encodeDataLength(short length) {
-        if(length == Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED) {
+        if(length == Constants.EXTENDED_LENGTH) {
             return new byte[]{0x00, 0x00};
         }
         if (length == 256) {
@@ -104,14 +104,8 @@ public class ApduLengthUtils {
         return new byte[]{parts[1]};
     }
 
-    public static byte[] encodeMaxExpectedLength(int length) throws InvalidNumericException {
-        if (length == Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED) {
-            return new byte[] {0x00, 0x00};
-        }
-        if (length > Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED) {
-            throw new InvalidNumericException("length > Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED");
-        }
-        return encodeDataLength((short) length);
+    public static byte[] encodeMaxExpectedLength(short length) {
+        return encodeDataLength(length);
     }
 }
 

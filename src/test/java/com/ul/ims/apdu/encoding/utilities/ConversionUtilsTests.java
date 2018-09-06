@@ -66,8 +66,12 @@ public class ConversionUtilsTests {
 
     @Test
     public void testBytesToBits() {
-        byte[] input = new byte[]{1, 3};
+        byte[] input = new byte[]{1};
         byte[] result = ConversionUtils.bytesToBits(input);
+        assertArrayEquals(new byte[]{0, 0, 0, 0, 0, 0, 0, 1}, result);
+
+        input = new byte[]{1, 3};
+        result = ConversionUtils.bytesToBits(input);
         assertArrayEquals(new byte[]{0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1}, result);
     }
 
