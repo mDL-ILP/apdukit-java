@@ -8,9 +8,7 @@ import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.apps.ExampleApp;
 import com.ul.ims.apdu.interpreter.Exceptions.OutOfSequenceException;
 import com.ul.ims.apdu.interpreter.Exceptions.ResponseApduStatusCodeError;
-import com.ul.ims.apdu.interpreter.PresentationLayer.SimpleApduPresentationLayer;
-import com.ul.ims.apdu.interpreter.PresentationLayer.PresentationLayer;
-import com.ul.ims.apdu.interpreter.PresentationLayer.PresentationLayerDelegate;
+import com.ul.ims.apdu.interpreter.PresentationLayer.*;
 import com.ul.ims.apdu.interpreter.SessionLayer.HolderSessionLayer;
 import com.ul.ims.apdu.interpreter.SessionLayer.ReaderSessionLayer;
 import com.ul.ims.apdu.interpreter.SessionLayer.SessionLayer;
@@ -41,11 +39,11 @@ public class InterpreterIntegrationTests {
     private SessionLayer sessionLayerReader;
 
     class Holder implements PresentationLayerDelegate {
-        PresentationLayer presentationLayer;
+        HolderPresentationLayer holderPresentationLayer;
 
-        Holder(PresentationLayer presentationLayer) {
-            this.presentationLayer = presentationLayer;
-            this.presentationLayer.setDelegate(this);
+        Holder(HolderPresentationLayer presentationLayer) {
+            this.holderPresentationLayer = presentationLayer;
+            this.holderPresentationLayer.setDelegate(this);
         }
 
         @Override
@@ -55,11 +53,11 @@ public class InterpreterIntegrationTests {
     }
 
     class Reader implements PresentationLayerDelegate {
-        PresentationLayer presentationLayer;
+        ReaderPresentationLayer readerPresentationLayer;
 
-        Reader(PresentationLayer presentationLayer) {
-            this.presentationLayer = presentationLayer;
-            this.presentationLayer.setDelegate(this);
+        Reader(ReaderPresentationLayer readerPresentationLayer) {
+            this.readerPresentationLayer = readerPresentationLayer;
+            this.readerPresentationLayer.setDelegate(this);
         }
 
         @Override
@@ -78,8 +76,8 @@ public class InterpreterIntegrationTests {
         this.sessionLayerHolder = new HolderSessionLayer(transportLayerSimulatorHolder);
         this.sessionLayerReader = new ReaderSessionLayer(transportLayerSimulatorReader);
 
-        PresentationLayer presentationLayerHolder = new SimpleApduPresentationLayer(sessionLayerHolder, ExampleApp.instance.ValidDF_NormalLength1);
-        PresentationLayer presentationLayerReader = new SimpleApduPresentationLayer(sessionLayerReader, ExampleApp.instance.ValidDF_NormalLength1);
+        HolderPresentationLayer presentationLayerHolder = new HolderPresentationLayer(sessionLayerHolder, ExampleApp.instance.ValidDF_NormalLength1);
+        ReaderPresentationLayer presentationLayerReader = new ReaderPresentationLayer(sessionLayerReader, ExampleApp.instance.ValidDF_NormalLength1);
 
         this.holder = new Holder(presentationLayerHolder);
         this.reader = new Reader(presentationLayerReader);
@@ -94,8 +92,8 @@ public class InterpreterIntegrationTests {
 
     @Test
     public void holderDoesNotHaveFile_ForInvalidDF() throws Throwable {
-        this.holder.presentationLayer = new SimpleApduPresentationLayer(sessionLayerHolder, ExampleApp.instance.ValidDF_NormalLength2);
-        Promise p = reader.presentationLayer.getFile(ExampleApp.instance.ValidEF1);
+        this.holder.holderPresentationLayer = new HolderPresentationLayer(sessionLayerHolder, ExampleApp.instance.ValidDF_NormalLength2);
+        Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.ValidEF1);
         try {
             Assert.assertNull(p.getValue());
         }catch(ResponseApduStatusCodeError e) {
@@ -123,7 +121,7 @@ public class InterpreterIntegrationTests {
     public void testHolderRespondsWithUnknownError() throws Throwable {
         this.transportLayerSimulatorHolder = mock(TransportLayerSimulator.class);
         this.sessionLayerHolder = new HolderSessionLayer(transportLayerSimulatorHolder);
-        this.sessionLayerHolder.setDelegate(this.holder.presentationLayer);
+        this.sessionLayerHolder.setDelegate(this.holder.holderPresentationLayer);
 
         byte[] onReceiveData = new byte[] {(byte) 0x01, (byte) 0x02};
         this.sessionLayerHolder.onReceive(onReceiveData);
@@ -139,7 +137,7 @@ public class InterpreterIntegrationTests {
         //Subject we're testing.
         this.sessionLayerReader = new ReaderSessionLayer(transportLayerSimulatorReader);
 
-        PresentationLayer presentationLayerReader = mock(SimpleApduPresentationLayer.class);
+        PresentationLayer presentationLayerReader = mock(ReaderPresentationLayer.class);
         this.sessionLayerReader.setDelegate(presentationLayerReader);
 
         ///Call
@@ -175,7 +173,7 @@ public class InterpreterIntegrationTests {
     public void sendSELECT_FollowedByOnReceiveInvalidResponseApdu2_ThrowsException() throws Throwable {
         this.transportLayerSimulatorReader = mock(TransportLayerSimulator.class);
         this.sessionLayerReader = new ReaderSessionLayer(transportLayerSimulatorReader);
-        this.sessionLayerReader.setDelegate(this.reader.presentationLayer);
+        this.sessionLayerReader.setDelegate(this.reader.readerPresentationLayer);
 
         byte[] randomPayload = {0};
         Promise p = sessionLayerReader.send(randomPayload).then(e -> {
@@ -189,15 +187,15 @@ public class InterpreterIntegrationTests {
     @Test
     public void holderRespondsWithRequestedFileUsingReadBinaryShortId() throws Throwable {
         byte[] expected = new byte[]{01, 02, 03, 07};
-        assertTrue("Could not set file", holder.presentationLayer.setFile(ExampleApp.instance.ValidEF1, expected));
+        assertTrue("Could not set file", holder.holderPresentationLayer.setFile(ExampleApp.instance.ValidEF1, expected));
 
-        Promise p = reader.presentationLayer.getFile(ExampleApp.instance.ValidEF1);
+        Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.ValidEF1);
         Assert.assertArrayEquals(expected, (byte[])p.getValue(1000));
     }
 
     @Test
     public void holderDoesNotHavetRequestedFile_UnsetReadBinaryShortId() throws Throwable {
-        Promise p = reader.presentationLayer.getFile(ExampleApp.instance.ValidEF1).then((res) -> {
+        Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.ValidEF1).then((res) -> {
             Assert.fail("File not set. Therefore, promise must fail.");
             return null;
         });
@@ -212,14 +210,14 @@ public class InterpreterIntegrationTests {
     @Test
     public void holderRespondsWithRequestedFileUsingReadBinaryOffset() throws Throwable {
         byte[] expected = new byte[]{01, 02, 05, 06};
-        assertTrue("Can't set file", holder.presentationLayer.setFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId, expected));
-        Promise p = reader.presentationLayer.getFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId);
+        assertTrue("Can't set file", holder.holderPresentationLayer.setFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId, expected));
+        Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId);
         Assert.assertArrayEquals(expected, (byte[])p.getValue(100000));
     }
 
     @Test
     public void holderDoesNotHavetRequestedFile_UnsetReadBinaryOffset() throws Throwable {
-        Promise p = reader.presentationLayer.getFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId).then((res) -> {
+        Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId).then((res) -> {
             Assert.fail("File not set. Therefore, promise must fail.");
             return null;
         });
@@ -234,16 +232,16 @@ public class InterpreterIntegrationTests {
     @Test
     public void holderGetLargeFileUsingNormalFileIdFromReader() throws Throwable {
         byte[] expected = ExampleApp.instance.Datagroup1;
-        assertTrue("Can't set file", holder.presentationLayer.setFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId, expected));
-        Promise p = reader.presentationLayer.getFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId);
+        assertTrue("Can't set file", holder.holderPresentationLayer.setFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId, expected));
+        Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId);
         Assert.assertArrayEquals(expected, (byte[])p.getValue(100000));
     }
 
     @Test
     public void holderGetLargeFileUsingShortFileIdFromReader() throws Throwable {
         byte[] expected = ExampleApp.instance.Datagroup1;
-        assertTrue("Can't set file", holder.presentationLayer.setFile(ExampleApp.instance.ValidEF2, expected));
-        Promise p = reader.presentationLayer.getFile(ExampleApp.instance.ValidEF2);
+        assertTrue("Can't set file", holder.holderPresentationLayer.setFile(ExampleApp.instance.ValidEF2, expected));
+        Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.ValidEF2);
         Assert.assertArrayEquals(expected, (byte[])p.getValue(100000));
     }
 
@@ -251,10 +249,10 @@ public class InterpreterIntegrationTests {
     @Test
     public void holderSequentialGetFile() throws Throwable {
         byte[] expected = new byte[]{01, 02, 03, 07};
-        assertTrue("Could not set file", holder.presentationLayer.setFile(ExampleApp.instance.ValidEF1, expected));
+        assertTrue("Could not set file", holder.holderPresentationLayer.setFile(ExampleApp.instance.ValidEF1, expected));
 
         Thread thread = new Thread(() -> {
-            Promise p = reader.presentationLayer.getFile(ExampleApp.instance.ValidEF1);
+            Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.ValidEF1);
             try {
                 Assert.assertArrayEquals(expected, (byte[])p.getValue(1000));
             } catch (Throwable throwable) {
@@ -263,7 +261,7 @@ public class InterpreterIntegrationTests {
         });
         thread.start();
 
-        Promise p = reader.presentationLayer.getFile(ExampleApp.instance.ValidEF1);
+        Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.ValidEF1);
 
         Assert.assertArrayEquals(expected, (byte[])p.getValue(1000));
         thread.join();

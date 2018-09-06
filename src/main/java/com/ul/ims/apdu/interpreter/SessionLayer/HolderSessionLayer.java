@@ -11,7 +11,7 @@ import com.ul.ims.apdu.interpreter.transportlayer.TransportLayer;
 
 public class HolderSessionLayer implements SessionLayer {
     private TransportLayer transportLayer;
-    private SessionLayerDelegate delegate;
+    private HolderSessionLayerDelegate delegate;
 
     public HolderSessionLayer(TransportLayer transportLayer) {
         this.transportLayer = transportLayer;
@@ -25,7 +25,7 @@ public class HolderSessionLayer implements SessionLayer {
 
     @Override
     public void setDelegate(SessionLayerDelegate delegate) {
-        this.delegate = delegate;
+        this.delegate = (HolderSessionLayerDelegate) delegate;
     }
 
     private void sendResponse(ResponseApdu response) {

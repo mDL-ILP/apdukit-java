@@ -7,10 +7,8 @@ import com.ul.ims.apdu.interpreter.SessionLayer.SessionLayerDelegate;
 
 public interface PresentationLayer extends SessionLayerDelegate {
 
-    Promise<byte[]> getFile(ElementaryFileID elementaryFileID);
-    boolean setFile(ElementaryFileID id, byte[] data) throws InvalidApduFileException;
     void setDelegate(PresentationLayerDelegate delegate);
 
-    void setMaximumExpectedLength(short value);
-    int getMaximumExpectedLength();
+//    void setMaximumExpectedLength(int value);
+//    int getMaximumExpectedLength();
 }

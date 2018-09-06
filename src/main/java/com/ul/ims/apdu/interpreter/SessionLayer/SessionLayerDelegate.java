@@ -7,10 +7,7 @@ import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 
 public interface SessionLayerDelegate {
-    //Responds with the binary data of that EF file.
-    ResponseApdu receivedReadRequest(ReadBinaryCommand command);
-    //Responds with the appropriate status code.
-    ResponseApdu receivedSelectRequest(SelectCommand command);
+
     //Informs the delegate when we've received an invalid apdu
     void onReceiveInvalidApdu(ParseException exception);
     //Informs the delegate when got an exception when sending has failed.
