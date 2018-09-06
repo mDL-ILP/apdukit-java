@@ -11,6 +11,8 @@ public interface SessionLayerDelegate {
     ResponseApdu receivedReadRequest(ReadBinaryCommand command);
     //Responds with the appropriate status code.
     ResponseApdu receivedSelectRequest(SelectCommand command);
+    //Informs the delegate when we've received an invalid apdu
     void onReceiveInvalidApdu(ParseException exception);
+    //Informs the delegate when got an exception when sending has failed.
     void onSendFailure(Exception exception);//This can be a IO Exception (lost connection) or invalid APDU.
 }

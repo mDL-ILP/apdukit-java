@@ -40,7 +40,7 @@ public class TransportLayerSimulatorTests {
     }
 
     @Test
-    public void testOnReceive() throws IOException, InvalidApduException {
+    public void testOnReceive() throws IOException {
         TransportLayerDelegate transportLayerDelegate = mock(TransportLayerDelegate.class);
         subject1.setDelegate(transportLayerDelegate);
         byte[] payload = new byte[6];
@@ -49,7 +49,7 @@ public class TransportLayerSimulatorTests {
     }
 
     @Test(expected = SocketException.class)
-    public void testDisconnectedOnReceive() throws IOException, InvalidApduException {
+    public void testDisconnectedOnReceive() throws IOException {
         subject1.onReceive(new byte[6]);
     }
 
