@@ -46,7 +46,7 @@ public class ApduLengthUtilsUnitTests {
 
     @Test(expected = ParseException.class)
     public void testDecodeDataLength_InvalidData() throws InvalidNumericException, ParseException {
-        ApduLengthUtils.decodeDataLength(null);
+        ApduLengthUtils.decodeDataLength(new ByteArrayInputStreamExtension(new byte[]{}));
     }
 
     @Test

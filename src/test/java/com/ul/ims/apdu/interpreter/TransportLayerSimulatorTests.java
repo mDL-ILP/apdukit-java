@@ -1,9 +1,9 @@
 package com.ul.ims.apdu.interpreter;
 
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
-import com.ul.ims.apdu.interpreter.transportLayer.TransportLayerSimulator;
-import com.ul.ims.apdu.interpreter.transportLayer.TransportLayerDelegate;
 
+import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerDelegate;
+import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
 import org.junit.Before;
 import org.junit.Test;
 

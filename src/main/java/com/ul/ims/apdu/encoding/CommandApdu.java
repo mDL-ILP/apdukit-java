@@ -6,6 +6,7 @@ import java.io.IOException;
 import com.ul.ims.apdu.encoding.enums.InstructionClass;
 import com.ul.ims.apdu.encoding.enums.InstructionCode;
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
+import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.encoding.exceptions.ValueNotSetException;
 import com.ul.ims.apdu.extensions.ByteArrayInputStreamExtension;
@@ -67,7 +68,7 @@ public abstract class CommandApdu implements Apdu {
     /**
      * Apdu to bytes.
      */
-    public ByteArrayOutputStream toBytes() throws IOException, InvalidApduException {
+    public ByteArrayOutputStream toBytes() throws IOException, InvalidApduException, InvalidNumericException {
         this.validate();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         stream.write(instructionClass.getValue());

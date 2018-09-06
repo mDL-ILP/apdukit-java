@@ -22,7 +22,7 @@ public class ApduLengthUtils {
      * @throws ParseException
      * @throws InvalidNumericException
      */
-    public static short decodeMaxExpectedLength(ByteArrayInputStreamExtension stream) throws ParseException, InvalidNumericException {
+    public static int decodeMaxExpectedLength(ByteArrayInputStreamExtension stream) throws ParseException {
         Byte firstByte = stream.readByte();
         Byte secondByte = stream.readByte();
         Byte thirdByte = stream.readByte();
@@ -41,7 +41,7 @@ public class ApduLengthUtils {
             }
             //If the two bytes are set to '0000', then Ne is 65 536.
             if (secondByte != null && secondByte == 0 && thirdByte == null) {
-                return (short) Constants.EXTENDED_LENGTH;
+                return Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED;
             }
         } else {
             //From '01' to 'FF', the byte encodes Nc from one to 255.
@@ -59,7 +59,7 @@ public class ApduLengthUtils {
      * @throws ParseException
      * @throws InvalidNumericException
      */
-    public static short decodeDataLength(ByteArrayInputStreamExtension stream) throws ParseException, InvalidNumericException {
+    public static short decodeDataLength(ByteArrayInputStreamExtension stream) throws ParseException {
         Byte firstByte = stream.readByte();
         if(firstByte == null) {
             throw new ParseException("Not enough bytes given to read data length.");
@@ -89,9 +89,6 @@ public class ApduLengthUtils {
      * @return byte array representing the given length.
      */
     public static byte[] encodeDataLength(short length) {
-        if(length == Constants.EXTENDED_LENGTH) {
-            return new byte[]{0x00, 0x00};
-        }
         if (length == 256) {
             return new byte[]{0x00};
         }
@@ -104,8 +101,14 @@ public class ApduLengthUtils {
         return new byte[]{parts[1]};
     }
 
-    public static byte[] encodeMaxExpectedLength(short length) {
-        return encodeDataLength(length);
+    public static byte[] encodeMaxExpectedLength(int length) throws InvalidNumericException {
+        if(length == Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED) {
+            return new byte[]{0x00, 0x00};
+        }
+        if (length > Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED) {
+            throw new InvalidNumericException("max expected length overflows extended length.");
+        }
+        return encodeDataLength((short)length);
     }
 }
 

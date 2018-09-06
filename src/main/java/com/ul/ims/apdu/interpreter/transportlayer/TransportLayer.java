@@ -1,4 +1,4 @@
-package com.ul.ims.apdu.interpreter.transportLayer;
+package com.ul.ims.apdu.interpreter.transportlayer;
 
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 

@@ -1,4 +1,4 @@
-package com.ul.ims.apdu.interpreter.transportLayer;
+package com.ul.ims.apdu.interpreter.transportlayer;
 
 import java.io.IOException;
 

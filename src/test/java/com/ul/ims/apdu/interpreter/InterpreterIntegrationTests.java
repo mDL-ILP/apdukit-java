@@ -4,7 +4,6 @@ import com.onehilltech.promises.Promise;
 import com.ul.ims.apdu.encoding.types.FileID;
 import com.ul.ims.apdu.encoding.enums.StatusCode;
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
-import com.ul.ims.apdu.encoding.exceptions.InvalidApduFileException;
 import com.ul.ims.apdu.apps.ExampleApp;
 import com.ul.ims.apdu.interpreter.Exceptions.OutOfSequenceException;
 import com.ul.ims.apdu.interpreter.Exceptions.ResponseApduStatusCodeError;
@@ -13,14 +12,13 @@ import com.ul.ims.apdu.interpreter.PresentationLayer.PresentationLayer;
 import com.ul.ims.apdu.interpreter.PresentationLayer.PresentationLayerDelegate;
 import com.ul.ims.apdu.interpreter.SessionLayer.SessionLayer;
 import com.ul.ims.apdu.interpreter.SessionLayer.SimpleSessionLayer;
-import com.ul.ims.apdu.interpreter.TransportLayer.TransportLayerSimulator;
 
+import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;

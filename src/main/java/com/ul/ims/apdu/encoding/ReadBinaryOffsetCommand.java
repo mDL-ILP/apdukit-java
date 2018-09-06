@@ -1,6 +1,7 @@
 package com.ul.ims.apdu.encoding;
 
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
+import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.encoding.utilities.ConversionUtils;
 import com.ul.ims.apdu.extensions.ByteArrayInputStreamExtension;
@@ -35,7 +36,7 @@ public class ReadBinaryOffsetCommand extends ReadBinaryCommand {
     }
 
     @Override
-    public ByteArrayOutputStream toBytes() throws IOException, InvalidApduException {
+    public ByteArrayOutputStream toBytes() throws IOException, InvalidApduException, InvalidNumericException {
         ByteArrayOutputStream stream = super.toBytes();
         this.encodeOffset(stream);
         this.encodeMaxExpectedLength(stream);

@@ -22,7 +22,7 @@ public class InternalAuthenticateCommand extends CommandApdu {
         super(InstructionCode.INTERNAL_AUTHENTICATE);
     }
 
-    public InternalAuthenticateCommand(ByteArrayInputStreamExtension stream) throws Exception {
+    public InternalAuthenticateCommand(ByteArrayInputStreamExtension stream) throws ParseException {
         super(stream);
         this.algorithmInfo = stream.readByte();
         this.referenceDataQualifier = stream.readByte();

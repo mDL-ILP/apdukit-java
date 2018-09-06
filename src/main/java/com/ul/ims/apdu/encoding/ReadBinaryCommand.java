@@ -15,7 +15,7 @@ import java.io.IOException;
 
 public abstract class ReadBinaryCommand extends CommandApdu {
 
-    short maximumExpectedLength = 0;//0 means EXTENDED_LENGTH.
+    int maximumExpectedLength = Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED;
 
     ReadBinaryCommand() {
         super(InstructionCode.READ_BINARY);
@@ -41,7 +41,7 @@ public abstract class ReadBinaryCommand extends CommandApdu {
         }
     }
 
-    protected void encodeMaxExpectedLength(ByteArrayOutputStream stream) throws IOException {
+    protected void encodeMaxExpectedLength(ByteArrayOutputStream stream) throws IOException, InvalidNumericException {
         stream.write(ApduLengthUtils.encodeMaxExpectedLength(this.maximumExpectedLength));
     }
 
@@ -55,11 +55,11 @@ public abstract class ReadBinaryCommand extends CommandApdu {
         return new ReadBinaryOffsetCommand(stream);
     }
 
-    public void setMaximumExpectedLength(short size) {
+    public void setMaximumExpectedLength(int size) {
         this.maximumExpectedLength = size;
     }
 
-    public short getMaximumExpectedLength() {
+    public int getMaximumExpectedLength() {
         return this.maximumExpectedLength;
     }
 

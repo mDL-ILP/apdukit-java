@@ -1,10 +1,10 @@
 package com.ul.ims.apdu.encoding;
 
 
+import com.ul.ims.apdu.encoding.enums.FileControlInfo;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.ul.ims.apdu.encoding.enums.ExpectedResultType;
 import com.ul.ims.apdu.encoding.exceptions.ValueNotSetException;
 import com.ul.ims.apdu.apps.ExampleApp;
 
@@ -26,7 +26,7 @@ public class SelectCommandBuildTests {
     public void testSelectDF() throws Exception {
         //Setup
         subject.setFileID(ExampleApp.instance.ValidDF_NormalLength2);
-        subject.setExpectedResult(ExpectedResultType.NOTHING);
+        subject.setFileControlInfo(FileControlInfo.NOFCIReturn);
         byte[] expected = new byte[]{(byte) 0x0, (byte) 0xA4, (byte) 0x04, (byte) 0x0C,
                 (byte) 0x07, (byte) 0xA0, (byte) 0x00, (byte) 0x00, (byte) 0x02,
                 (byte) 0x48, (byte) 0x04, (byte) 0x00};
@@ -42,7 +42,7 @@ public class SelectCommandBuildTests {
     public void testSelectExtendedDF() throws Exception {
         //Setup
         subject.setFileID(ExampleApp.instance.ValidDF_ExtendedLength);
-        subject.setExpectedResult(ExpectedResultType.NOTHING);
+        subject.setFileControlInfo(FileControlInfo.NOFCIReturn);
 
         ByteArrayOutputStream expectedStream = new ByteArrayOutputStream();
         expectedStream.write(new byte[]{(byte) 0x0, (byte) 0xA4, (byte) 0x04, (byte) 0x0C, (byte) 0x00, (byte) 0x01, (byte) 0x05});
@@ -59,7 +59,7 @@ public class SelectCommandBuildTests {
     public void testSelectEF() throws Exception {
         //Setup
         subject.setFileID(ExampleApp.instance.ValidEF_NoShortId);
-        subject.setExpectedResult(ExpectedResultType.NOTHING);
+        subject.setFileControlInfo(FileControlInfo.NOFCIReturn);
         byte[] expected = new byte[]{(byte) 0x00, (byte) 0xA4, (byte) 0x02, (byte) 0x0C,
                 (byte) 0x02, (byte) 0x01, (byte) 0x1C};
 
@@ -74,8 +74,8 @@ public class SelectCommandBuildTests {
     public void testValidation() throws Exception {
         callValidation("fileID");
         subject.setFileID(ExampleApp.instance.ValidEF1);
-        callValidation("expectedResult");
-        subject.setExpectedResult(ExpectedResultType.NOTHING);
+        callValidation("fileControlInfo");
+        subject.setFileControlInfo(FileControlInfo.NOFCIReturn);
         subject.validate();
     }
 

@@ -1,11 +1,8 @@
 package com.ul.ims.apdu.encoding.utilities;
 
-import com.sun.tools.javac.util.ArrayUtils;
 import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ConversionUtils {
     /**
@@ -46,7 +43,7 @@ public class ConversionUtils {
         int bitsIndex = 0;
 
         for (final byte _byte : bytes) {
-            final byte[] bitsFromByte = toBitArray(_byte);
+            final byte[] bitsFromByte = byteToBits(_byte);
             System.arraycopy(bitsFromByte, 0, bits, bitsIndex, 8);
             bitsIndex +=8;
         }
@@ -56,39 +53,21 @@ public class ConversionUtils {
 
     /**
      * converts byte to an array of bits
-     * @param bbyte byte
+     * @param value byte
      * @return array of bits max 8 long.
      */
-    public static byte[] toBitArray(final byte bbyte) {
+    public static byte[] byteToBits(final byte value) {
         final byte[] bitArray = new byte[8];
-        bitArray[7] = (byte) ((bbyte & 0x1) != 0 ? 1 : 0);
-        bitArray[6] = (byte) ((bbyte & 0x2) != 0 ? 1 : 0);
-        bitArray[5] = (byte) ((bbyte & 0x4) != 0 ? 1 : 0);
-        bitArray[4] = (byte) ((bbyte & 0x8) != 0 ? 1 : 0);
-        bitArray[3] = (byte) ((bbyte & 0x10) != 0 ? 1 : 0);
-        bitArray[2] = (byte) ((bbyte & 0x20) != 0 ? 1 : 0);
-        bitArray[1] = (byte) ((bbyte & 0x40) != 0 ? 1 : 0);
-        bitArray[0] = (byte) ((bbyte & 0x80) != 0 ? 1 : 0);
+        bitArray[7] = (byte) ((value & 0x1) != 0 ? 1 : 0);
+        bitArray[6] = (byte) ((value & 0x2) != 0 ? 1 : 0);
+        bitArray[5] = (byte) ((value & 0x4) != 0 ? 1 : 0);
+        bitArray[4] = (byte) ((value & 0x8) != 0 ? 1 : 0);
+        bitArray[3] = (byte) ((value & 0x10) != 0 ? 1 : 0);
+        bitArray[2] = (byte) ((value & 0x20) != 0 ? 1 : 0);
+        bitArray[1] = (byte) ((value & 0x40) != 0 ? 1 : 0);
+        bitArray[0] = (byte) ((value & 0x80) != 0 ? 1 : 0);
 
         return  bitArray;
-    }
-
-    /**
-     * converts byte to bits
-     * @param b byte
-     * @return array of bits max 8 long.
-     */
-    public static byte[] byteToBits(byte b) {
-        final byte[] result = new byte[8];
-        for (int i = 7; i > 0; i--) {
-            if((b & 1) == 1) {
-                result[i] = 1;
-            } else {
-                result[i] = 0;
-            }
-            b >>= 1;
-        }
-        return result;
     }
 
     /**
