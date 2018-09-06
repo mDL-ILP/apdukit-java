@@ -41,7 +41,7 @@ public abstract class CommandApdu implements Apdu {
     }
 
     /**
-     * Apdu from bytes. Routes and initializes the right apdu subclass depending on the instructionCode
+     * Apdu from bytes. Routes and initializes the right command APDU subclass depending on the instructionCode
      */
     public static CommandApdu fromBytes(byte[] buf) throws ParseException {
         ByteArrayInputStreamExtension stream = new ByteArrayInputStreamExtension(buf);

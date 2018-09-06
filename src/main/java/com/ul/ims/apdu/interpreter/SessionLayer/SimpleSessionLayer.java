@@ -3,10 +3,12 @@ package com.ul.ims.apdu.interpreter.SessionLayer;
 import com.onehilltech.promises.Promise;
 import com.ul.ims.apdu.encoding.*;
 import com.ul.ims.apdu.encoding.enums.StatusCode;
+import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.interpreter.Exceptions.OutOfSequenceException;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayer;
 
+import java.io.IOException;
 import java.util.concurrent.Semaphore;
 
 public class SimpleSessionLayer implements SessionLayer {
@@ -67,8 +69,8 @@ public class SimpleSessionLayer implements SessionLayer {
      * @param request the external request.
      * @return response back to the requester.
      */
-    private ResponseApdu onReceiveRequest(CommandApdu request) {
-        ResponseApdu response = new ResponseApdu().setStatusCode(StatusCode.ERROR_UNKNOWN);//Our response back.
+    private ResponseApdu onReceiveCommand(CommandApdu request) {
+        ResponseApdu response = null;
         if (request instanceof SelectCommand) {
             response = this.delegate.receivedSelectRequest((SelectCommand) request);
         } else if (request instanceof ReadBinaryCommand) {
@@ -84,25 +86,41 @@ public class SimpleSessionLayer implements SessionLayer {
      * @param buf raw bytes received from the transport layer.
      */
     public synchronized void onReceive(byte[] buf) {
+        //Understand what we've received and handle it
         ResponseApdu response = null;
         try {
             Apdu message = this.decodeApdu(buf);
             if(message instanceof CommandApdu) {
-                response = this.onReceiveRequest((CommandApdu) message);
+                response = this.onReceiveCommand((CommandApdu) message);
             }
             if (message instanceof ResponseApdu) {
                 this.onReceiveResponse((ResponseApdu) message);
             }
         } catch (ParseException e) {
-            //TODO: Call delegate to tell them we can't read the received message.
+            this.delegate.onReceiveInvalidApdu(e);
+            if(openRequest != null) {
+                openRequest.reject(e);
+                openRequest = null;
+            }
+            response = new ResponseApdu().setStatusCode(StatusCode.ERROR_UNKNOWN);
         }
+
+        //Constraint: Holder doesn't send a message back
+        if(openRequest == null) {
+            return;
+        }
+
         //Send it back
         try {
             if (response != null) {
                 this.transportLayer.write(response.toBytes().toByteArray());
             }
         }catch (Exception e) {
-            //TODO: Call delegate to tell them we can't respond back.
+            this.delegate.onSendFailure(e);
+            try {
+                response = new ResponseApdu().setStatusCode(StatusCode.ERROR_UNKNOWN);
+                this.transportLayer.write(response.toBytes().toByteArray());
+            } catch (Exception ignored) {}
         }
     }
 

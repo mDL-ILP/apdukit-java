@@ -1,6 +1,7 @@
 package com.ul.ims.apdu.interpreter;
 
 import com.onehilltech.promises.Promise;
+import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.encoding.types.FileID;
 import com.ul.ims.apdu.encoding.enums.StatusCode;
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
@@ -22,6 +23,7 @@ import java.io.IOException;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -100,17 +102,7 @@ public class InterpreterIntegrationTests {
         }
     }
 
-    @Test
-    public void holderRespondsWithUnknownError6F00() throws Throwable {
-        this.transportLayerSimulatorHolder = mock(TransportLayerSimulator.class);
-        this.sessionLayerHolder = new SimpleSessionLayer(transportLayerSimulatorHolder);
-
-        byte[] onReceiveData = new byte[] {(byte) 0x01, (byte) 0x02};
-        this.sessionLayerHolder.onReceive(onReceiveData);
-
-        verify(transportLayerSimulatorHolder, timeout(100).times(1)).write(new byte[]{(byte) 0x6F, (byte) 0x00});
-    }
-
+    //Tests race condition with sending
     @Test(expected = OutOfSequenceException.class)
     public void sequentialSendSELECT_BeforeOnReceive_ThrowsException() throws Throwable {
         this.transportLayerSimulatorReader = mock(TransportLayerSimulator.class);
@@ -126,19 +118,41 @@ public class InterpreterIntegrationTests {
         p2.getValue();
     }
 
-    //Tests race condition with sending
-    @Test(expected = InvalidApduException.class)
-    public void sendSELECT_FollowedByOnReceiveInvalidResponseApdu1_ThrowsException() throws Throwable {
+    @Test
+    public void testHolderRespondsWithUnknownError() throws Throwable {
+        this.transportLayerSimulatorHolder = mock(TransportLayerSimulator.class);
+        this.sessionLayerHolder = new SimpleSessionLayer(transportLayerSimulatorHolder);
+
+        byte[] onReceiveData = new byte[] {(byte) 0x01, (byte) 0x02};
+        this.sessionLayerHolder.onReceive(onReceiveData);
+
+        verify(transportLayerSimulatorHolder, timeout(100).times(1)).write(new byte[]{(byte) 0x6F, (byte) 0x00});//Statuscode.ERROR_UNKNOWN
+    }
+
+    @Test(expected = ParseException.class)
+    public void testInvalidResponseOnOpenRequest() throws Throwable {
+        ///Setup
+        //Mock transport layer so it doesn't actually write.
         this.transportLayerSimulatorReader = mock(TransportLayerSimulator.class);
+        //Subject we're testing.
         this.sessionLayerReader = new SimpleSessionLayer(transportLayerSimulatorReader);
 
+        PresentationLayer presentationLayerReader = mock(SimpleApduPresentationLayer.class);
+        this.sessionLayerReader.setDelegate(presentationLayerReader);
+
+        ///Call
+        //Send random bytes to open a request.
         byte[] randomPayload = {0, 1, 2, 3};
         Promise p = sessionLayerReader.send(randomPayload).then(e -> {
             Assert.fail("Invalid response must not resolve promise.");
             return null;
         });
+        //Instantly send nonsense. And check if the session delegate (presentation layer) gets informed.
         sessionLayerReader.onReceive(randomPayload);
-        p.getValue(1000);
+
+        //Assertion
+        verify(presentationLayerReader, timeout(100).times(1)).onReceiveInvalidApdu(isA(ParseException.class));
+        p.getValue();//This will throw the expected exception. Because 0, 1, 2, 3 isn't a valid response apdu.
     }
 
     //tests timeout

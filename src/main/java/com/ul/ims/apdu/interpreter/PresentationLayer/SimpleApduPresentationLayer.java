@@ -1,6 +1,7 @@
 package com.ul.ims.apdu.interpreter.PresentationLayer;
 
 import com.onehilltech.promises.Promise;
+import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.encoding.types.ApduFile;
 import com.ul.ims.apdu.encoding.CommandApdu;
 import com.ul.ims.apdu.encoding.Constants;
@@ -25,7 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Semaphore;
 
-public class SimpleApduPresentationLayer implements PresentationLayer, SessionLayerDelegate {
+public class SimpleApduPresentationLayer implements PresentationLayer {
     private SessionLayer sessionLayer;
     //State
     private DedicatedFileID selectedApp;
@@ -47,6 +48,7 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
     /**
      * Gets an elementary file. Hangs if there is already an open request.
+     *
      * @param elementaryFileID
      * @return
      */
@@ -88,7 +90,7 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
         return Promise.resolve(this.selectedEF == fileID)
                 .then(isAlreadySelected -> {
-                    if(isAlreadySelected) {
+                    if (isAlreadySelected) {
                         return Promise.resolve(new ResponseApdu().setStatusCode(StatusCode.SUCCESSFUL_PROCESSING));
                     }
                     return send(command);
@@ -106,22 +108,22 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
         command.setFileID(fileID);
 
         return Promise.resolve(selectedApp == appId)
-            .then(isAlreadySelected -> {
-                if(isAlreadySelected) {
-                    return Promise.resolve(new ResponseApdu().setStatusCode(StatusCode.SUCCESSFUL_PROCESSING));
-                }
-                return send(command);
-            })
-            .then(this::verifySelectResponse)
-            .then(result -> {
-                selectedApp = fileID;
-                return Promise.resolve(result);
-            });
+                .then(isAlreadySelected -> {
+                    if (isAlreadySelected) {
+                        return Promise.resolve(new ResponseApdu().setStatusCode(StatusCode.SUCCESSFUL_PROCESSING));
+                    }
+                    return send(command);
+                })
+                .then(this::verifySelectResponse)
+                .then(result -> {
+                    selectedApp = fileID;
+                    return Promise.resolve(result);
+                });
     }
 
     private Promise<ResponseApdu> verifySelectResponse(ResponseApdu response) {
         return new Promise<>(settlement -> {
-            if(response.getStatusCode() == StatusCode.SUCCESSFUL_PROCESSING) {
+            if (response.getStatusCode() == StatusCode.SUCCESSFUL_PROCESSING) {
                 settlement.resolve(response);
             } else {
                 settlement.reject(new ResponseApduStatusCodeError(response.getStatusCode()));
@@ -138,6 +140,7 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
     /**
      * Creates the intial first part of a APDU file by selecting the ElementaryFileID on at the holder and read a few initial bytes.
+     *
      * @param fileID
      * @return
      */
@@ -145,7 +148,7 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
         return new Promise<>(settlement -> {
             ApduFile result;
             Promise<byte[]> promise;
-            final byte offset = (byte)0;
+            final byte offset = (byte) 0;
             //If short file id is available, a read will also instantly select the file.
             if (fileID.isShortIDAvailable()) {
                 promise = this.readEFShortID(fileID, offset);
@@ -165,11 +168,12 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
     /**
      * This method will take a complete or incomplete APDu file and keeps reading until it is complete. Then return the bytes.
+     *
      * @param file APDU file. Created by reading the first 5 bytes or part of the file.\
      * @return
      */
     private Promise<byte[]> resolveApduFile(ApduFile file) {
-        if(file == null) {
+        if (file == null) {
             return Promise.reject(new InvalidApduFileException("File is null"));
         }
         return new Promise<>(settlement -> {
@@ -179,7 +183,7 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
                 try {
                     byte[] data = promise.getValue();
                     file.appendValue(data);
-                }  catch (Throwable e) {
+                } catch (Throwable e) {
                     settlement.reject(e);
                 }
             }
@@ -209,7 +213,7 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
     private Promise<byte[]> verifyReadBinaryResponse(ResponseApdu result) {
         StatusCode resultStatus = result.getStatusCode();
         return new Promise<>(settlement -> {
-            if(resultStatus == StatusCode.SUCCESSFUL_PROCESSING || resultStatus == StatusCode.WARNING_END_OF_FILE) {
+            if (resultStatus == StatusCode.SUCCESSFUL_PROCESSING || resultStatus == StatusCode.WARNING_END_OF_FILE) {
                 settlement.resolve(result.getData());
                 return;
             }
@@ -219,7 +223,8 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
     /**
      * Sets the file for a particular file id on the holders side.
-     * @param id the file id of the data
+     *
+     * @param id   the file id of the data
      * @param data bytes of the file.
      * @return boolean informing the caller if the file was successfully set.
      */
@@ -228,7 +233,7 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
         ApduFile file;
         try {
             file = new ApduFile(data);
-            if(!file.isComplete()) {
+            if (!file.isComplete()) {
                 return false;
             }
             files.put(id.getNormalIDValueAsAShort(), file);
@@ -238,7 +243,8 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
         try {
             files.put(id.getShortIDValueAsAShort(), file);
-        } catch (InvalidNumericException e) {}
+        } catch (InvalidNumericException e) {
+        }
         return true;
     }
 
@@ -249,6 +255,7 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
     /**
      * Handles a select request.
+     *
      * @param command
      * @return
      */
@@ -268,8 +275,19 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
         return new ResponseApdu().setStatusCode(result);
     }
 
+    @Override
+    public void onReceiveInvalidApdu(ParseException exception) {
+        exception.printStackTrace();
+    }
+
+    @Override
+    public void onSendFailure(Exception exception) {
+
+    }
+
     /**
      * Handles a read request.
+     *
      * @param command
      * @return
      */
@@ -279,20 +297,20 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
         ElementaryFileID id = this.selectedEF;
         if (command instanceof ReadBinaryShortFileIDCommand) {
-            id = ((ReadBinaryShortFileIDCommand)command).getElementaryFileID();
+            id = ((ReadBinaryShortFileIDCommand) command).getElementaryFileID();
         }
-        if(id == null) {
+        if (id == null) {
             response.setStatusCode(StatusCode.ERROR_COMMAND_NOT_ALLOWED);
             return response;
         }
         //Check if file exists
         ApduFile file = getLocalFile(id);
-        if(file == null) {
+        if (file == null) {
             response.setStatusCode(StatusCode.ERROR_FILE_NOT_FOUND);
             return response;
         }
         //Check access
-        if(delegate != null && !delegate.checkAccessConditions(id)) {
+        if (delegate != null && !delegate.checkAccessConditions(id)) {
             response.setStatusCode(StatusCode.ERROR_SECURITY_STATUS_NOT_SATISFIED);
             return response;
         }
@@ -306,7 +324,7 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
         //EndOffset is the index of how far we'll read.
         int readEndIndex = readBeginIndex + maxResponseSize;
         boolean askedForToomuch = false;
-        if(readEndIndex > data.length) {
+        if (readEndIndex > data.length) {
             readEndIndex = data.length;
             askedForToomuch = true;
         }
@@ -323,6 +341,7 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
     /**
      * Extended length. Set max expected length for response to read commands.
+     *
      * @param value new max expected length value
      */
     public void setMaximumExpectedLength(short value) {
@@ -331,6 +350,7 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
     /**
      * get max expected length for response to read commands.
+     *
      * @return maxExpLength
      */
     public int getMaximumExpectedLength() {
@@ -339,11 +359,12 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
     /**
      * Sets the selected app id (DedicatedFileID)and returns if this was successful.
+     *
      * @param id dedicatedFileID specifying the app id
      * @return boolean indicating if the set was successful.
      */
     private boolean setSelectedApp(DedicatedFileID id) {
-        if(id == null || !id.equals(appId))  {
+        if (id == null || !id.equals(appId)) {
             return false;
         }
         this.selectedApp = id;
@@ -352,11 +373,12 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
     /**
      * Set the selected file id (elementaryFileID) and returns if this was successful.
+     *
      * @param id elementaryFileID specifying the file
      * @return boolean indicating if the set was successful.
      */
     private boolean setSelectedEF(ElementaryFileID id) {
-        if(id == null || this.getLocalFile(id) == null) {
+        if (id == null || this.getLocalFile(id) == null) {
             return false;
         }
         this.selectedEF = id;
@@ -365,22 +387,25 @@ public class SimpleApduPresentationLayer implements PresentationLayer, SessionLa
 
     /**
      * Returns back a local file from this.files. Trying both short and normal.
+     *
      * @param id elementaryFileID specifying the file
      * @return an ApduFile
      */
     private ApduFile getLocalFile(ElementaryFileID id) {
         try {
             short key = id.getShortIDValueAsAShort();
-            if(files.containsKey(key)) {
+            if (files.containsKey(key)) {
                 return files.get(key);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         try {
             short key = id.getNormalIDValueAsAShort();
-            if(files.containsKey(key)) {
+            if (files.containsKey(key)) {
                 return files.get(key);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return null;
     }
 }
