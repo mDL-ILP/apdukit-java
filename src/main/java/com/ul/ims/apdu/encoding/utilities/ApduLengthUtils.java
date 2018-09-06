@@ -22,7 +22,7 @@ public class ApduLengthUtils {
      * @throws ParseException
      * @throws InvalidNumericException
      */
-    public static int decodeMaxExpectedLength(ByteArrayInputStreamExtension stream) throws ParseException, InvalidNumericException {
+    public static int decodeMaxExpectedLength(ByteArrayInputStreamExtension stream) throws ParseException {
         Byte firstByte = stream.readByte();
         Byte secondByte = stream.readByte();
         Byte thirdByte = stream.readByte();

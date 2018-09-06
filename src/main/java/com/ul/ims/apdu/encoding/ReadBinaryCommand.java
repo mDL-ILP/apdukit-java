@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public abstract class ReadBinaryCommand extends CommandApdu {
 
-    int maximumExpectedLength = Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED;//Default is to use DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED.
+    int maximumExpectedLength = Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED;
 
     ReadBinaryCommand() {
         super(InstructionCode.READ_BINARY);

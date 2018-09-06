@@ -28,7 +28,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-public class SimpleApduPresentationLayerTest {
+public class InterpreterIntegrationTests {
 
     private Holder holder;
     private Reader reader;
