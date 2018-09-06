@@ -11,8 +11,9 @@ import com.ul.ims.apdu.interpreter.Exceptions.ResponseApduStatusCodeError;
 import com.ul.ims.apdu.interpreter.PresentationLayer.SimpleApduPresentationLayer;
 import com.ul.ims.apdu.interpreter.PresentationLayer.PresentationLayer;
 import com.ul.ims.apdu.interpreter.PresentationLayer.PresentationLayerDelegate;
+import com.ul.ims.apdu.interpreter.SessionLayer.HolderSessionLayer;
+import com.ul.ims.apdu.interpreter.SessionLayer.ReaderSessionLayer;
 import com.ul.ims.apdu.interpreter.SessionLayer.SessionLayer;
-import com.ul.ims.apdu.interpreter.SessionLayer.SimpleSessionLayer;
 
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
 import org.junit.Assert;
@@ -74,8 +75,8 @@ public class InterpreterIntegrationTests {
         transportLayerSimulatorHolder.connect(transportLayerSimulatorReader);
         transportLayerSimulatorReader.connect(transportLayerSimulatorHolder);
 
-        this.sessionLayerHolder = new SimpleSessionLayer(transportLayerSimulatorHolder);
-        this.sessionLayerReader = new SimpleSessionLayer(transportLayerSimulatorReader);
+        this.sessionLayerHolder = new HolderSessionLayer(transportLayerSimulatorHolder);
+        this.sessionLayerReader = new ReaderSessionLayer(transportLayerSimulatorReader);
 
         PresentationLayer presentationLayerHolder = new SimpleApduPresentationLayer(sessionLayerHolder, ExampleApp.instance.ValidDF_NormalLength1);
         PresentationLayer presentationLayerReader = new SimpleApduPresentationLayer(sessionLayerReader, ExampleApp.instance.ValidDF_NormalLength1);
@@ -106,7 +107,7 @@ public class InterpreterIntegrationTests {
     @Test(expected = OutOfSequenceException.class)
     public void sequentialSendSELECT_BeforeOnReceive_ThrowsException() throws Throwable {
         this.transportLayerSimulatorReader = mock(TransportLayerSimulator.class);
-        this.sessionLayerReader = new SimpleSessionLayer(transportLayerSimulatorReader);
+        this.sessionLayerReader = new ReaderSessionLayer(transportLayerSimulatorReader);
 
         byte[] randomPayload = {0,1,2,3};
         sessionLayerReader.send(randomPayload);//line 1
@@ -121,7 +122,8 @@ public class InterpreterIntegrationTests {
     @Test
     public void testHolderRespondsWithUnknownError() throws Throwable {
         this.transportLayerSimulatorHolder = mock(TransportLayerSimulator.class);
-        this.sessionLayerHolder = new SimpleSessionLayer(transportLayerSimulatorHolder);
+        this.sessionLayerHolder = new HolderSessionLayer(transportLayerSimulatorHolder);
+        this.sessionLayerHolder.setDelegate(this.holder.presentationLayer);
 
         byte[] onReceiveData = new byte[] {(byte) 0x01, (byte) 0x02};
         this.sessionLayerHolder.onReceive(onReceiveData);
@@ -135,7 +137,7 @@ public class InterpreterIntegrationTests {
         //Mock transport layer so it doesn't actually write.
         this.transportLayerSimulatorReader = mock(TransportLayerSimulator.class);
         //Subject we're testing.
-        this.sessionLayerReader = new SimpleSessionLayer(transportLayerSimulatorReader);
+        this.sessionLayerReader = new ReaderSessionLayer(transportLayerSimulatorReader);
 
         PresentationLayer presentationLayerReader = mock(SimpleApduPresentationLayer.class);
         this.sessionLayerReader.setDelegate(presentationLayerReader);
@@ -172,7 +174,8 @@ public class InterpreterIntegrationTests {
     @Test(expected = InvalidApduException.class)
     public void sendSELECT_FollowedByOnReceiveInvalidResponseApdu2_ThrowsException() throws Throwable {
         this.transportLayerSimulatorReader = mock(TransportLayerSimulator.class);
-        this.sessionLayerReader = new SimpleSessionLayer(transportLayerSimulatorReader);
+        this.sessionLayerReader = new ReaderSessionLayer(transportLayerSimulatorReader);
+        this.sessionLayerReader.setDelegate(this.reader.presentationLayer);
 
         byte[] randomPayload = {0};
         Promise p = sessionLayerReader.send(randomPayload).then(e -> {

@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Semaphore;
 
-public class SimpleApduPresentationLayer implements PresentationLayer {
+public class SimpleApduPresentationLayer implements PresentationLayer, SessionLayerDelegate {
     private SessionLayer sessionLayer;
     //State
     private DedicatedFileID selectedApp;
