@@ -11,10 +11,10 @@ import java.util.concurrent.Semaphore;
 
 public class ReaderSessionLayer implements SessionLayer {
     private TransportLayer transportLayer;
-    private SessionLayerDelegate delegate;
+    private ReaderSessionLayerDelegate delegate;
 
     //Apdu's
-    Semaphore openRequestLock = new Semaphore(1);
+    private Semaphore openRequestLock = new Semaphore(1);
     private Promise.Settlement<ResponseApdu> openRequest = null;
 
     public ReaderSessionLayer(TransportLayer transportLayer) {
@@ -44,7 +44,7 @@ public class ReaderSessionLayer implements SessionLayer {
 
     @Override
     public void setDelegate(SessionLayerDelegate delegate) {
-        this.delegate = delegate;
+        this.delegate = (ReaderSessionLayerDelegate) delegate;
     }
 
     @Override
