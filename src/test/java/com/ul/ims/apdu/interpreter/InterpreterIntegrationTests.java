@@ -37,7 +37,7 @@ public class InterpreterIntegrationTests {
     private SessionLayer sessionLayerHolder;
     private SessionLayer sessionLayerReader;
 
-    class Holder implements PresentationLayerDelegate {
+    class Holder implements HolderPresentationLayerDelegate {
         HolderPresentationLayer holderPresentationLayer;
 
         Holder(HolderPresentationLayer presentationLayer) {
@@ -49,9 +49,14 @@ public class InterpreterIntegrationTests {
         public boolean checkAccessConditions(FileID id) {
             return true;
         }
+
+        @Override
+        public Promise<byte[]> signChallenge(byte[] challenge) {
+            return null;
+        }
     }
 
-    class Reader implements PresentationLayerDelegate {
+    class Reader implements ReaderPresentationLayerDelegate{
         ReaderPresentationLayer readerPresentationLayer;
 
         Reader(ReaderPresentationLayer readerPresentationLayer) {
@@ -59,10 +64,6 @@ public class InterpreterIntegrationTests {
             this.readerPresentationLayer.setDelegate(this);
         }
 
-        @Override
-        public boolean checkAccessConditions(FileID id) {
-            return false;
-        }
     }
 
     @Before
