@@ -84,14 +84,14 @@ public class InterpreterIntegrationTests {
     }
 
     @Test(expected = IOException.class)
-    public void sendCommandRejectsPromise_WhenNoExternalTransportLayerIsConnected() throws Throwable {
+    public void test_SessionLayerSend_NoExternalTransportLayer() throws Throwable {
         transportLayerSimulatorReader.connect(null);
         Promise p = this.sessionLayerReader.send(new byte[]{1, 2});
         Assert.assertNull(p.getValue(1000));
     }
 
     @Test
-    public void holderDoesNotHaveFile_ForInvalidDF() throws Throwable {
+    public void test_getFile_WrongDF() throws Throwable {
         this.holder.holderPresentationLayer = new HolderPresentationLayer(sessionLayerHolder, ExampleApp.instance.ValidDF_NormalLength2);
         Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.ValidEF1);
         try {
@@ -103,7 +103,7 @@ public class InterpreterIntegrationTests {
 
     //Tests race condition with sending
     @Test(expected = OutOfSequenceException.class)
-    public void sequentialSendSELECT_BeforeOnReceive_ThrowsException() throws Throwable {
+    public void test_SessionLayerSend_CalledOutOfSequence() throws Throwable {
         this.transportLayerSimulatorReader = mock(TransportLayerSimulator.class);
         this.sessionLayerReader = new ReaderSessionLayer(transportLayerSimulatorReader);
 
@@ -118,7 +118,7 @@ public class InterpreterIntegrationTests {
     }
 
     @Test
-    public void testHolderRespondsWithUnknownError() throws Throwable {
+    public void test_HolderOnReceive_UnknownError() throws Throwable {
         this.transportLayerSimulatorHolder = mock(TransportLayerSimulator.class);
         this.sessionLayerHolder = new HolderSessionLayer(transportLayerSimulatorHolder);
         this.sessionLayerHolder.setDelegate(this.holder.holderPresentationLayer);
@@ -130,7 +130,7 @@ public class InterpreterIntegrationTests {
     }
 
     @Test(expected = ParseException.class)
-    public void testInvalidResponseOnOpenRequest() throws Throwable {
+    public void test_ReaderOnReceive_InvalidResponse() throws Throwable {
         ///Setup
         //Mock transport layer so it doesn't actually write.
         this.transportLayerSimulatorReader = mock(TransportLayerSimulator.class);
@@ -159,7 +159,7 @@ public class InterpreterIntegrationTests {
 //    @Test(expected = TimeoutException.class)
 //    public void testTimeout() throws Throwable {
 //        this.transportLayerSimulatorReader = mock(TransportLayerSimulator.class);
-//        this.sessionLayerReader = new SimpleSessionLayer(transportLayerSimulatorReader);
+//        this.sessionLayerReader = new ReaderSessionLayer(transportLayerSimulatorReader);
 //
 //        byte[] randomPayload = {0, 1, 2, 4};
 //        Promise p = sessionLayerReader.send(randomPayload).then(e -> {
@@ -170,7 +170,7 @@ public class InterpreterIntegrationTests {
 //    }
 
     @Test(expected = InvalidApduException.class)
-    public void sendSELECT_FollowedByOnReceiveInvalidResponseApdu2_ThrowsException() throws Throwable {
+    public void test_ReaderOnReceive_WithOpenRequest_InvalidResponse() throws Throwable {
         this.transportLayerSimulatorReader = mock(TransportLayerSimulator.class);
         this.sessionLayerReader = new ReaderSessionLayer(transportLayerSimulatorReader);
         this.sessionLayerReader.setDelegate(this.reader.readerPresentationLayer);
@@ -185,7 +185,7 @@ public class InterpreterIntegrationTests {
     }
 
     @Test
-    public void holderRespondsWithRequestedFileUsingReadBinaryShortId() throws Throwable {
+    public void test_getFile_ShortId_Success() throws Throwable {
         byte[] expected = new byte[]{01, 02, 03, 07};
         assertTrue("Could not set file", holder.holderPresentationLayer.setFile(ExampleApp.instance.ValidEF1, expected));
 
@@ -194,7 +194,7 @@ public class InterpreterIntegrationTests {
     }
 
     @Test
-    public void holderDoesNotHavetRequestedFile_UnsetReadBinaryShortId() throws Throwable {
+    public void test_getFile_ShortId_FileNotAvailable() throws Throwable {
         Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.ValidEF1).then((res) -> {
             Assert.fail("File not set. Therefore, promise must fail.");
             return null;
@@ -208,7 +208,7 @@ public class InterpreterIntegrationTests {
     }
 
     @Test
-    public void holderRespondsWithRequestedFileUsingReadBinaryOffset() throws Throwable {
+    public void test_getFile_NormalId_Success() throws Throwable {
         byte[] expected = new byte[]{01, 02, 05, 06};
         assertTrue("Can't set file", holder.holderPresentationLayer.setFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId, expected));
         Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId);
@@ -216,7 +216,7 @@ public class InterpreterIntegrationTests {
     }
 
     @Test
-    public void holderDoesNotHavetRequestedFile_UnsetReadBinaryOffset() throws Throwable {
+    public void test_getFile_NormalId_FileNotAvailable() throws Throwable {
         Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId).then((res) -> {
             Assert.fail("File not set. Therefore, promise must fail.");
             return null;
@@ -230,7 +230,7 @@ public class InterpreterIntegrationTests {
     }
 
     @Test
-    public void holderGetLargeFileUsingNormalFileIdFromReader() throws Throwable {
+    public void test_getFile_NormalId_LargeFile() throws Throwable {
         byte[] expected = ExampleApp.instance.Datagroup1;
         assertTrue("Can't set file", holder.holderPresentationLayer.setFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId, expected));
         Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.InvalidShortFileId_ButValidNormalId);
@@ -238,7 +238,7 @@ public class InterpreterIntegrationTests {
     }
 
     @Test
-    public void holderGetLargeFileUsingShortFileIdFromReader() throws Throwable {
+    public void test_getFile_ShortId_LargeFile() throws Throwable {
         byte[] expected = ExampleApp.instance.Datagroup1;
         assertTrue("Can't set file", holder.holderPresentationLayer.setFile(ExampleApp.instance.ValidEF2, expected));
         Promise p = reader.readerPresentationLayer.getFile(ExampleApp.instance.ValidEF2);
@@ -247,7 +247,7 @@ public class InterpreterIntegrationTests {
 
     //Tests race condition with get file.
     @Test
-    public void holderSequentialGetFile() throws Throwable {
+    public void test_getFile_OutOfSequence() throws Throwable {
         byte[] expected = new byte[]{01, 02, 03, 07};
         assertTrue("Could not set file", holder.holderPresentationLayer.setFile(ExampleApp.instance.ValidEF1, expected));
 
