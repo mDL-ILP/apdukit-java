@@ -4,7 +4,6 @@ import com.ul.ims.apdu.encoding.enums.InstructionCode;
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
-import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 
 import com.ul.ims.apdu.encoding.utilities.ApduLengthUtils;
 import com.ul.ims.apdu.encoding.utilities.ConversionUtils;
@@ -25,14 +24,6 @@ public abstract class ReadBinaryCommand extends CommandApdu {
         super(stream);
     }
 
-    @Override
-    public void validate() throws InvalidApduException {
-        super.validate();
-        if(instructionCode != InstructionCode.READ_BINARY) {
-            throw new InvalidApduException("InstructionCode is not READ_BINARY");
-        }
-    }
-
     protected void decodeMaxExpectedLength(ByteArrayInputStreamExtension stream) throws ParseException {
         try {
             this.maximumExpectedLength = ApduLengthUtils.decodeMaxExpectedLength(stream);
@@ -45,6 +36,17 @@ public abstract class ReadBinaryCommand extends CommandApdu {
         stream.write(ApduLengthUtils.encodeMaxExpectedLength(this.maximumExpectedLength));
     }
 
+    @Override
+    public void validate() throws InvalidApduException {
+        super.validate();
+        if(instructionCode != InstructionCode.READ_BINARY) {
+            throw new InvalidApduException("InstructionCode is not READ_BINARY");
+        }
+    }
+
+    /**
+     * Apdu from bytes. Routes and initializes the right read binary subclass depending on the file id bits.
+     */
     static ReadBinaryCommand fromBytes(ByteArrayInputStreamExtension stream) throws ParseException {
         stream.skip(2);//Skip the instruction class + instruction code
         byte fileIdFirstByte = stream.readByte();

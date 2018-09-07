@@ -19,7 +19,7 @@ public abstract class CommandApdu implements Apdu {
     InstructionClass instructionClass = InstructionClass.DEFAULT;
     InstructionCode instructionCode;
 
-    CommandApdu(ByteArrayInputStreamExtension stream) throws InvalidApduException {
+    CommandApdu(ByteArrayInputStreamExtension stream) {
         this.instructionClass = InstructionClass.valueOf(stream.readByte());
         this.instructionCode = InstructionCode.valueOf(stream.readByte());
     }
@@ -49,7 +49,7 @@ public abstract class CommandApdu implements Apdu {
             throw new InvalidApduException("data should be at least 4 long");
         }
         stream.skip(1);//Skip instruction class.
-        InstructionCode instructionCode = InstructionCode.valueOf((byte)stream.readByte());
+        InstructionCode instructionCode = InstructionCode.valueOf(stream.readByte());
         if(instructionCode == null) {
             throw new ParseException("Instruction code byte could not be mapped to the instructionCode enum");
         }

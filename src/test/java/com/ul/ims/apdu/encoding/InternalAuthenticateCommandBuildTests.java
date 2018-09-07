@@ -9,7 +9,7 @@ import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-public class InternalAuthenticateBuildTests {
+public class InternalAuthenticateCommandBuildTests {
     private InternalAuthenticateCommand subject;
 
     @Before
@@ -31,8 +31,10 @@ public class InternalAuthenticateBuildTests {
         assertArrayEquals(expected, result);
     }
 
-    @Test()
+    @Test
     public void testValidation() throws Exception {
+        callValidation("Invalid challenge");
+        subject.setChallenge(new byte[8]);
         callValidation("algorithmInfo");
         subject.setAlgorithmInfo(Constants.DEFAULT_ALGORITHM_INFO);
         callValidation("referenceDataQualifier");
@@ -46,6 +48,8 @@ public class InternalAuthenticateBuildTests {
             fail("It should've thrown an exception");
         }catch (ValueNotSetException e) {
             assertEquals(value, e.getValueName());
+        }catch (InvalidApduException e) {
+            assertEquals(value, e.getDescription());
         } catch (Exception e) {
             fail("It threw the wrong exception");
         }

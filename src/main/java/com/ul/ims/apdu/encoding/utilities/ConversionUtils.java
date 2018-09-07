@@ -57,17 +57,17 @@ public class ConversionUtils {
      * @return array of bits max 8 long.
      */
     public static byte[] byteToBits(final byte value) {
-        final byte[] bitArray = new byte[8];
-        bitArray[7] = (byte) ((value & 0x1) != 0 ? 1 : 0);
-        bitArray[6] = (byte) ((value & 0x2) != 0 ? 1 : 0);
-        bitArray[5] = (byte) ((value & 0x4) != 0 ? 1 : 0);
-        bitArray[4] = (byte) ((value & 0x8) != 0 ? 1 : 0);
-        bitArray[3] = (byte) ((value & 0x10) != 0 ? 1 : 0);
-        bitArray[2] = (byte) ((value & 0x20) != 0 ? 1 : 0);
-        bitArray[1] = (byte) ((value & 0x40) != 0 ? 1 : 0);
-        bitArray[0] = (byte) ((value & 0x80) != 0 ? 1 : 0);
+        final byte[] result = new byte[8];
+        result[7] = (byte) ((value & 0x1) != 0 ? 1 : 0);
+        result[6] = (byte) ((value & 0x2) != 0 ? 1 : 0);
+        result[5] = (byte) ((value & 0x4) != 0 ? 1 : 0);
+        result[4] = (byte) ((value & 0x8) != 0 ? 1 : 0);
+        result[3] = (byte) ((value & 0x10) != 0 ? 1 : 0);
+        result[2] = (byte) ((value & 0x20) != 0 ? 1 : 0);
+        result[1] = (byte) ((value & 0x40) != 0 ? 1 : 0);
+        result[0] = (byte) ((value & 0x80) != 0 ? 1 : 0);
 
-        return  bitArray;
+        return  result;
     }
 
     /**

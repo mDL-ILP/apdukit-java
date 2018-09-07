@@ -1,9 +1,7 @@
 package com.ul.ims.apdu.encoding;
 
-import com.ul.ims.apdu.encoding.enums.InstructionCode;
 import com.ul.ims.apdu.encoding.enums.StatusCode;
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
-import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.encoding.exceptions.ValueNotSetException;
 import com.ul.ims.apdu.encoding.utilities.ConversionUtils;

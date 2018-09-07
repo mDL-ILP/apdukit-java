@@ -101,10 +101,15 @@ public class ApduLengthUtils {
         return new byte[]{parts[1]};
     }
 
+    /**
+     * For a given max expected length encode it into bytes.
+     * Now this length is a short. But we use int because the standard overflows a short with the value 65536 which is 1 more than a short. The standard replaces the value 0 for the value 65536.
+     */
     public static byte[] encodeMaxExpectedLength(int length) throws InvalidNumericException {
         if(length == Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED) {
             return new byte[]{0x00, 0x00};
         }
+        //Check if it doesn't overflow a short.
         if (length > Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED) {
             throw new InvalidNumericException("max expected length overflows extended length.");
         }

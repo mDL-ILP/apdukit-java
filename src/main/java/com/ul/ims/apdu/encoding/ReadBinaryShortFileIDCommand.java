@@ -40,7 +40,7 @@ public class ReadBinaryShortFileIDCommand extends ReadBinaryCommand {
     }
 
     @Override
-    public void validate() throws InvalidApduException{
+    public void validate() throws InvalidApduException {
         super.validate();
         if(elementaryFileID == null) {
             throw new ValueNotSetException("elementaryFileID");
