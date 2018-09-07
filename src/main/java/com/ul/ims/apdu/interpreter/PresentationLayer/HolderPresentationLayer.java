@@ -24,7 +24,7 @@ public class HolderPresentationLayer implements PresentationLayer, HolderSession
 
     private int maxExpLength = Constants.DEFAULT_MAX_EXPECTED_LENGTH_NOT_EXTENDED;
 
-    private PresentationLayerDelegate delegate;
+    private HolderPresentationLayerDelegate delegate;
     //Config
     private DedicatedFileID appId;//app id
 
@@ -62,7 +62,7 @@ public class HolderPresentationLayer implements PresentationLayer, HolderSession
 
     @Override
     public void setDelegate(PresentationLayerDelegate delegate) {
-
+        this.delegate = (HolderPresentationLayerDelegate) delegate;
     }
 
 //    /**
