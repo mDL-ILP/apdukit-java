@@ -18,7 +18,7 @@ public class ConversionUtilsTests {
     }
 
     @Test
-    public void successfulBytesToShort() throws InvalidNumericException {
+    public void testBytesToShort() throws InvalidNumericException {
         byte[] input = new byte[] {(byte) 0x01, (byte) 0x05};
         short expected = (short)261;
 
@@ -26,7 +26,7 @@ public class ConversionUtilsTests {
     }
 
     @Test
-    public void successfulBytesToShort2() throws InvalidNumericException {
+    public void testBytesToShort2() throws InvalidNumericException {
         byte[] input = new byte[] {(byte) 7};
         short expected = (short)7;
 
@@ -34,7 +34,7 @@ public class ConversionUtilsTests {
     }
 
     @Test
-    public void successfulBytesToShort3() throws InvalidNumericException {
+    public void testBytesToShort3() throws InvalidNumericException {
         byte[] input = new byte[] {(byte) 0x00, (byte) 0xff};
         short expected = (short)255;
 
@@ -42,13 +42,13 @@ public class ConversionUtilsTests {
     }
 
     @Test(expected = InvalidNumericException.class)
-    public void successfulBytesToShort4() throws InvalidNumericException {
+    public void testBytesToShort4() throws InvalidNumericException {
         byte[] input = new byte[] {(byte) 0x00, (byte) 0xff, (byte) 0xff};
         ConversionUtils.fromBytesToShort(input);
     }
 
     @Test
-    public void successfulShortToBytes() {
+    public void testShortToBytes() {
         short value = (short) 0x9000;
         assertArrayEquals(new byte[]{(byte)0x90, (byte) 0x00}, ConversionUtils.fromShortToBytes(value));
     }

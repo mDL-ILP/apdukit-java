@@ -10,7 +10,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 //Normal means not extended length
-public class ApduLengthUtilsUnitTests {
+public class ApduLengthUtilsTests {
 
     @Test
     public void testEncodeDataLengthExtended() {
@@ -45,7 +45,7 @@ public class ApduLengthUtilsUnitTests {
     }
 
     @Test(expected = ParseException.class)
-    public void testDecodeDataLength_InvalidData() throws ParseException {
+    public void testDecodeDataLength_NoData() throws ParseException {
         ApduLengthUtils.decodeDataLength(new ByteArrayInputStreamExtension(new byte[]{}));
     }
 
