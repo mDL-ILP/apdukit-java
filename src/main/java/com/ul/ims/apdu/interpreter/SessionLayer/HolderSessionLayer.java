@@ -19,8 +19,8 @@ public class HolderSessionLayer implements SessionLayer {
     }
 
     @Override
-    public Promise<ResponseApdu> send(byte[] data) {
-        return Promise.reject(new Exception("You're a holder! You can't ask for stuff!"));
+    public Promise<ResponseApdu> send(CommandApdu command) {
+        return Promise.reject(new Exception("Following the APDU specification a holder cannot start a send"));
     }
 
     @Override

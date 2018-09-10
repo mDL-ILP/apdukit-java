@@ -1,6 +1,7 @@
 package com.ul.ims.apdu.interpreter.SessionLayer;
 
 import com.onehilltech.promises.Promise;
+import com.ul.ims.apdu.encoding.CommandApdu;
 import com.ul.ims.apdu.encoding.ResponseApdu;
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
@@ -13,7 +14,6 @@ public class ReaderSessionLayer implements SessionLayer {
     private TransportLayer transportLayer;
     private ReaderSessionLayerDelegate delegate;
 
-    //Apdu's
     private Semaphore openRequestLock = new Semaphore(1);
     private Promise.Settlement<ResponseApdu> openRequest = null;
 
@@ -22,12 +22,31 @@ public class ReaderSessionLayer implements SessionLayer {
         this.transportLayer.setDelegate(this);
     }
 
+    private Promise<byte[]> commandToBytes(CommandApdu input) {
+        return new Promise<>(settlement -> {
+            try {
+                settlement.resolve(input.toBytes().toByteArray());
+            } catch (Exception e) {
+                settlement.reject(e);
+            }
+        });
+    }
+
     @Override
-    public synchronized Promise<ResponseApdu> send(byte[] data) {
-        if(!openRequestLock.tryAcquire()) {
+    public Promise<ResponseApdu> send(CommandApdu command) {
+        if(!openRequestLock.tryAcquire()) {//Only one command at a time.
             return Promise.reject(new OutOfSequenceException());
         }
-        Promise<ResponseApdu> p = new Promise<>(settlement -> {
+        Promise<ResponseApdu> p = commandToBytes(command).then(this::sendBytes);
+        p.always(() -> {
+            openRequest = null;
+            openRequestLock.release();
+        });
+        return p;
+    }
+
+    private synchronized Promise<ResponseApdu> sendBytes(byte[] data) {
+        return new Promise<>(settlement -> {
             try {
                 openRequest = settlement;
                 transportLayer.write(data);
@@ -35,11 +54,6 @@ public class ReaderSessionLayer implements SessionLayer {
                 settlement.reject(e);
             }
         });
-        p.always(() -> {
-            openRequest = null;
-            openRequestLock.release();
-        });
-        return p;
     }
 
     @Override
@@ -51,7 +65,6 @@ public class ReaderSessionLayer implements SessionLayer {
     public void onReceive(byte[] data) {
         //We received an unwanted response?
         if(this.openRequest == null) {
-            this.delegate.onReceiveInvalidApdu(new InvalidApduException("received unwanted response"));
             return;
         }
         try {
@@ -59,8 +72,6 @@ public class ReaderSessionLayer implements SessionLayer {
             this.openRequest.resolve(response);
         } catch (ParseException e) {
             this.openRequest.reject(e);
-            this.delegate.onReceiveInvalidApdu(e);
         }
-
     }
 }

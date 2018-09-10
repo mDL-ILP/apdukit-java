@@ -22,8 +22,6 @@ public class HolderPresentationLayer implements PresentationLayer, HolderSession
     private ElementaryFileID selectedEF;
     private HashMap<Short, ApduFile> files = new HashMap<>();
 
-    private int maxExpLength = Constants.DEFAULT_MAX_EXPECTED_LENGTH_NOT_EXTENDED;
-
     private HolderPresentationLayerDelegate delegate;
     //Config
     private DedicatedFileID appId;//app id
@@ -64,26 +62,6 @@ public class HolderPresentationLayer implements PresentationLayer, HolderSession
     public void setDelegate(PresentationLayerDelegate delegate) {
         this.delegate = (HolderPresentationLayerDelegate) delegate;
     }
-
-//    /**
-//     * Extended length. Set max expected length for response to read commands.
-//     *
-//     * @param value new max expected length value
-//     */
-//    @Override
-//    public void setMaximumExpectedLength(int value) {
-//        this.maxExpLength = value;
-//    }
-//
-//    /**
-//     * get max expected length for response to read commands.
-//     *
-//     * @return maxExpLength
-//     */
-//    @Override
-//    public int getMaximumExpectedLength() {
-//        return maxExpLength;
-//    }
 
     /**
      * Handles a read request.
@@ -182,6 +160,10 @@ public class HolderPresentationLayer implements PresentationLayer, HolderSession
      * @return boolean indicating if the set was successful.
      */
     private boolean setSelectedEF(ElementaryFileID id) {
+        //You can only select an EF after you've selected an app.
+        if(selectedApp == null) {
+            return false;
+        }
         if (id == null || this.getLocalFile(id) == null) {
             return false;
         }
@@ -214,12 +196,12 @@ public class HolderPresentationLayer implements PresentationLayer, HolderSession
     }
 
     @Override
-    public void onReceiveInvalidApdu(ParseException exception) {
-        exception.printStackTrace();
+    public void onSendFailure(Exception exception) {
+
     }
 
     @Override
-    public void onSendFailure(Exception exception) {
-        exception.printStackTrace();
+    public void onReceiveInvalidApdu(ParseException exception) {
+
     }
 }

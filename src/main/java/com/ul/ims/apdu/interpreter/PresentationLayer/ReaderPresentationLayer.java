@@ -98,7 +98,7 @@ public class ReaderPresentationLayer implements PresentationLayer, ReaderSession
         command.setOffset(offset);
         command.setMaximumExpectedLength(maxExpLength);
 
-        return send(command).then(this::verifyReadBinaryResponse);
+        return this.sessionLayer.send(command).then(this::verifyReadBinaryResponse);
     }
 
     private Promise<byte[]> verifyReadBinaryResponse(ResponseApdu result) {
@@ -143,7 +143,7 @@ public class ReaderPresentationLayer implements PresentationLayer, ReaderSession
         command.setOffset(offset);
         command.setElementaryFileID(fileID);
         command.setMaximumExpectedLength(maxExpLength);
-        return send(command).then(this::verifyReadBinaryResponse);
+        return this.sessionLayer.send(command).then(this::verifyReadBinaryResponse);
     }
 
     private Promise selectDF(DedicatedFileID fileID) {
@@ -156,7 +156,7 @@ public class ReaderPresentationLayer implements PresentationLayer, ReaderSession
                     if (isAlreadySelected) {
                         return Promise.resolve(new ResponseApdu().setStatusCode(StatusCode.SUCCESSFUL_PROCESSING));
                     }
-                    return send(command);
+                    return this.sessionLayer.send(command);
                 })
                 .then(this::verifySelectResponse)
                 .then(result -> {
@@ -175,17 +175,13 @@ public class ReaderPresentationLayer implements PresentationLayer, ReaderSession
                     if (isAlreadySelected) {
                         return Promise.resolve(new ResponseApdu().setStatusCode(StatusCode.SUCCESSFUL_PROCESSING));
                     }
-                    return send(command);
+                    return this.sessionLayer.send(command);
                 })
                 .then(this::verifySelectResponse)
                 .then(result -> {
                     this.selectedEF = fileID;
                     return Promise.resolve(result);
                 });
-    }
-
-    private Promise<ResponseApdu> send(CommandApdu command) {
-        return buildCommandApdu(command).then(bytes -> sessionLayer.send(bytes));
     }
 
     private Promise<ResponseApdu> verifySelectResponse(ResponseApdu response) {
@@ -198,48 +194,31 @@ public class ReaderPresentationLayer implements PresentationLayer, ReaderSession
         });
     }
 
-    private Promise<byte[]> buildCommandApdu(CommandApdu input) {
-        return new Promise<>(settlement -> {
-            try {
-                settlement.resolve(input.toBytes().toByteArray());
-            } catch (Exception e) {
-                settlement.reject(e);
-            }
-        });
-    }
-
     @Override
     public void setDelegate(PresentationLayerDelegate delegate) {
         this.delegate = delegate;
     }
 
-//    /**
-//     * Extended length. Set max expected length for response to read commands.
-//     *
-//     * @param value new max expected length value
-//     */
-//    @Override
-//    public void setMaximumExpectedLength(int value) {
-//        this.maxExpLength = value;
-//    }
-//
-//    /**
-//     * get max expected length for response to read commands.
-//     *
-//     * @return maxExpLength
-//     */
-//    @Override
-//    public int getMaximumExpectedLength() {
-//        return maxExpLength;
-//    }
+    /**
+     * Extended length. Set max expected length for response to read commands.
+     *
+     * @param value new max expected length value
+     */
+    public void setMaximumExpectedLength(int value) {
+        this.maxExpLength = value;
+    }
 
-    @Override
-    public void onReceiveInvalidApdu(ParseException exception) {
-        exception.printStackTrace();
+    /**
+     * get max expected length for response to read commands.
+     *
+     * @return maxExpLength
+     */
+    public int getMaximumExpectedLength() {
+        return maxExpLength;
     }
 
     @Override
-    public void onSendFailure(Exception exception) {
+    public void onReceiveInvalidApdu(ParseException exception) {
         exception.printStackTrace();
     }
 }
