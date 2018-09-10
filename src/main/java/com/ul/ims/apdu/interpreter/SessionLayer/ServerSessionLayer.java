@@ -9,11 +9,14 @@ import com.ul.ims.apdu.encoding.enums.StatusCode;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayer;
 
-public class HolderSessionLayer implements SessionLayer {
+/**
+ * The server session layer handles sending and receiving apdu messages. It decodes incoming bytes into Apdu objects and then calls the appropriate delegate message handle method.
+ */
+public class ServerSessionLayer implements SessionLayer {
     private TransportLayer transportLayer;
-    private HolderSessionLayerDelegate delegate;
+    private SessionLayerDelegate delegate;
 
-    public HolderSessionLayer(TransportLayer transportLayer) {
+    public ServerSessionLayer(TransportLayer transportLayer) {
         this.transportLayer = transportLayer;
         this.transportLayer.setDelegate(this);
     }
@@ -25,7 +28,7 @@ public class HolderSessionLayer implements SessionLayer {
 
     @Override
     public void setDelegate(SessionLayerDelegate delegate) {
-        this.delegate = (HolderSessionLayerDelegate) delegate;
+        this.delegate = (SessionLayerDelegate) delegate;
     }
 
     private void sendResponse(ResponseApdu response) {

@@ -8,9 +8,12 @@ import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.apps.ExampleApp;
 import com.ul.ims.apdu.interpreter.Exceptions.OutOfSequenceException;
 import com.ul.ims.apdu.interpreter.Exceptions.ResponseApduStatusCodeError;
-import com.ul.ims.apdu.interpreter.PresentationLayer.*;
-import com.ul.ims.apdu.interpreter.SessionLayer.HolderSessionLayer;
-import com.ul.ims.apdu.interpreter.SessionLayer.ReaderSessionLayer;
+import com.ul.ims.apdu.old.HolderPresentationLayerDelegate;
+import com.ul.ims.apdu.old.PresentationLayer;
+import com.ul.ims.apdu.old.ReaderPresentationLayer;
+import com.ul.ims.apdu.old.ReaderPresentationLayerDelegate;
+import com.ul.ims.apdu.interpreter.SessionLayer.ServerSessionLayer;
+import com.ul.ims.apdu.interpreter.SessionLayer.ClientSessionLayer;
 import com.ul.ims.apdu.interpreter.SessionLayer.SessionLayer;
 
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
@@ -56,7 +59,7 @@ public class InterpreterIntegrationTests {
         }
     }
 
-    class Reader implements ReaderPresentationLayerDelegate{
+    class Reader implements ReaderPresentationLayerDelegate {
         ReaderPresentationLayer readerPresentationLayer;
 
         Reader(ReaderPresentationLayer readerPresentationLayer) {
@@ -73,8 +76,8 @@ public class InterpreterIntegrationTests {
         transportLayerSimulatorHolder.connect(transportLayerSimulatorReader);
         transportLayerSimulatorReader.connect(transportLayerSimulatorHolder);
 
-        this.sessionLayerHolder = new HolderSessionLayer(transportLayerSimulatorHolder);
-        this.sessionLayerReader = new ReaderSessionLayer(transportLayerSimulatorReader);
+        this.sessionLayerHolder = new ServerSessionLayer(transportLayerSimulatorHolder);
+        this.sessionLayerReader = new ClientSessionLayer(transportLayerSimulatorReader);
 
         HolderPresentationLayer presentationLayerHolder = new HolderPresentationLayer(sessionLayerHolder, ExampleApp.instance.ValidDF_NormalLength1);
         ReaderPresentationLayer presentationLayerReader = new ReaderPresentationLayer(sessionLayerReader, ExampleApp.instance.ValidDF_NormalLength1);
@@ -105,7 +108,7 @@ public class InterpreterIntegrationTests {
     @Test(expected = OutOfSequenceException.class)
     public void test_SessionLayerSend_CalledOutOfSequence() throws Throwable {
         this.transportLayerSimulatorReader = mock(TransportLayerSimulator.class);
-        this.sessionLayerReader = new ReaderSessionLayer(transportLayerSimulatorReader);
+        this.sessionLayerReader = new ClientSessionLayer(transportLayerSimulatorReader);
 
         byte[] randomPayload = {0,1,2,3};
         sessionLayerReader.send(randomPayload);//line 1
@@ -120,7 +123,7 @@ public class InterpreterIntegrationTests {
     @Test
     public void test_HolderOnReceive_UnknownError() throws Throwable {
         this.transportLayerSimulatorHolder = mock(TransportLayerSimulator.class);
-        this.sessionLayerHolder = new HolderSessionLayer(transportLayerSimulatorHolder);
+        this.sessionLayerHolder = new ServerSessionLayer(transportLayerSimulatorHolder);
         this.sessionLayerHolder.setDelegate(this.holder.holderPresentationLayer);
 
         byte[] onReceiveData = new byte[] {(byte) 0x01, (byte) 0x02};
@@ -135,7 +138,7 @@ public class InterpreterIntegrationTests {
         //Mock transport layer so it doesn't actually write.
         this.transportLayerSimulatorReader = mock(TransportLayerSimulator.class);
         //Subject we're testing.
-        this.sessionLayerReader = new ReaderSessionLayer(transportLayerSimulatorReader);
+        this.sessionLayerReader = new ClientSessionLayer(transportLayerSimulatorReader);
 
         PresentationLayer presentationLayerReader = mock(ReaderPresentationLayer.class);
         this.sessionLayerReader.setDelegate(presentationLayerReader);
@@ -172,7 +175,7 @@ public class InterpreterIntegrationTests {
     @Test(expected = InvalidApduException.class)
     public void test_ReaderOnReceive_WithOpenRequest_InvalidResponse() throws Throwable {
         this.transportLayerSimulatorReader = mock(TransportLayerSimulator.class);
-        this.sessionLayerReader = new ReaderSessionLayer(transportLayerSimulatorReader);
+        this.sessionLayerReader = new ClientSessionLayer(transportLayerSimulatorReader);
         this.sessionLayerReader.setDelegate(this.reader.readerPresentationLayer);
 
         byte[] randomPayload = {0};

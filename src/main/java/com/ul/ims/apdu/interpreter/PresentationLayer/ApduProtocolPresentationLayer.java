@@ -1,74 +1,105 @@
 package com.ul.ims.apdu.interpreter.PresentationLayer;
 
-import com.ul.ims.apdu.encoding.*;
+import com.onehilltech.promises.Promise;
+import com.ul.ims.apdu.encoding.ReadBinaryCommand;
+import com.ul.ims.apdu.encoding.ReadBinaryShortFileIDCommand;
+import com.ul.ims.apdu.encoding.ResponseApdu;
+import com.ul.ims.apdu.encoding.SelectCommand;
+import com.ul.ims.apdu.encoding.enums.FileControlInfo;
 import com.ul.ims.apdu.encoding.enums.SelectFileType;
 import com.ul.ims.apdu.encoding.enums.StatusCode;
-import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.encoding.types.ApduFile;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 import com.ul.ims.apdu.encoding.types.FileID;
-import com.ul.ims.apdu.interpreter.SessionLayer.HolderSessionLayerDelegate;
+import com.ul.ims.apdu.interpreter.Exceptions.ResponseApduStatusCodeError;
 import com.ul.ims.apdu.interpreter.SessionLayer.SessionLayer;
 
 import java.util.Arrays;
-import java.util.HashMap;
 
-public class HolderPresentationLayer implements PresentationLayer, HolderSessionLayerDelegate {
+public class ApduProtocolPresentationLayer implements PresentationLayer {
     private SessionLayer sessionLayer;
+    private PresentationLayerDelegate delegate;
+
     //State
     private DedicatedFileID selectedApp;
     private ElementaryFileID selectedEF;
-    private HashMap<Short, ApduFile> files = new HashMap<>();
 
-    private HolderPresentationLayerDelegate delegate;
-    //Config
-    private DedicatedFileID appId;//app id
-
-    public HolderPresentationLayer(SessionLayer sessionLayer, DedicatedFileID appId) {
+    public ApduProtocolPresentationLayer(SessionLayer sessionLayer) {
         this.sessionLayer = sessionLayer;
         this.sessionLayer.setDelegate(this);
-        this.appId = appId;
     }
 
-    /**
-     * Sets the file for a particular file id on the holders side.
-     *
-     * @param id   the file id of the data
-     * @param data bytes of the file.
-     * @return boolean informing the caller if the file was successfully set.
-     */
-    public boolean setFile(ElementaryFileID id, byte[] data) {
-        ApduFile file;
-        try {
-            file = new ApduFile(data);
-            if (!file.isComplete()) {
-                return false;
-            }
-            files.put(id.getNormalIDValueAsAShort(), file);
-        } catch (Exception e) {
-            return false;
-        }
+    public Promise selectDF(DedicatedFileID fileID) {
+        SelectCommand command = new SelectCommand();
+        command.setFileControlInfo(FileControlInfo.NOFCIReturn);
+        command.setFileID(fileID);
 
-        try {
-            files.put(id.getShortIDValueAsAShort(), file);
-        } catch (InvalidNumericException e) {
-        }
-        return true;
+        return Promise.resolve(selectedApp == fileID)
+                .then(isAlreadySelected -> {
+                    if (isAlreadySelected) {
+                        return Promise.resolve(new ResponseApdu().setStatusCode(StatusCode.SUCCESSFUL_PROCESSING));
+                    }
+                    return this.sessionLayer.send(command);
+                })
+                .then(this::verifySelectResponse)
+                .then(result -> {
+                    selectedApp = fileID;
+                    return Promise.resolve(result);
+                });
+    }
+
+    public Promise selectEF(final ElementaryFileID fileID) {
+        SelectCommand command = new SelectCommand();
+        command.setFileControlInfo(FileControlInfo.NOFCIReturn);
+        command.setFileID(fileID);
+
+        return Promise.resolve(this.selectedEF == fileID)
+                .then(isAlreadySelected -> {
+                    if (isAlreadySelected) {
+                        return Promise.resolve(new ResponseApdu().setStatusCode(StatusCode.SUCCESSFUL_PROCESSING));
+                    }
+                    return this.sessionLayer.send(command);
+                })
+                .then(this::verifySelectResponse)
+                .then(result -> {
+                    this.selectedEF = fileID;
+                    return Promise.resolve(result);
+                });
     }
 
     @Override
     public void setDelegate(PresentationLayerDelegate delegate) {
-        this.delegate = (HolderPresentationLayerDelegate) delegate;
+        this.delegate = delegate;
     }
 
-    /**
-     * Handles a read request.
-     *
-     * @param command
-     * @return
-     */
+    private Promise<ResponseApdu> verifySelectResponse(ResponseApdu response) {
+        return new Promise<>(settlement -> {
+            if (response.getStatusCode() == StatusCode.SUCCESSFUL_PROCESSING) {
+                settlement.resolve(response);
+            } else {
+                settlement.reject(new ResponseApduStatusCodeError(response.getStatusCode()));
+            }
+        });
+    }
+
+    @Override
+    public ResponseApdu receivedSelectRequest(SelectCommand command) {
+        SelectFileType type = command.getFileType();
+        StatusCode result = StatusCode.ERROR_UNKNOWN;
+        FileID requestedFileId = command.getFileID();
+        switch (type) {
+            case DF:
+                result = setSelectedApp((DedicatedFileID) requestedFileId) ? StatusCode.SUCCESSFUL_PROCESSING : StatusCode.ERROR_FILE_NOT_FOUND;
+                break;
+            case EF:
+                result = setSelectedEF((ElementaryFileID) requestedFileId) ? StatusCode.SUCCESSFUL_PROCESSING : StatusCode.ERROR_FILE_NOT_FOUND;
+                break;
+        }
+        return new ResponseApdu().setStatusCode(result);
+    }
+
     @Override
     public ResponseApdu receivedReadRequest(ReadBinaryCommand command) {
         ResponseApdu response = new ResponseApdu().setStatusCode(StatusCode.ERROR_UNKNOWN);
@@ -82,7 +113,7 @@ public class HolderPresentationLayer implements PresentationLayer, HolderSession
             return response;
         }
         //Check if file exists
-        ApduFile file = getLocalFile(id);
+        ApduFile file = this.delegate.getLocalFile(id);
         if (file == null) {
             response.setStatusCode(StatusCode.ERROR_FILE_NOT_FOUND);
             return response;
@@ -117,26 +148,14 @@ public class HolderPresentationLayer implements PresentationLayer, HolderSession
         return response;
     }
 
-    /**
-     * Handles a select request.
-     *
-     * @param command
-     * @return
-     */
     @Override
-    public ResponseApdu receivedSelectRequest(SelectCommand command) {
-        SelectFileType type = command.getFileType();
-        StatusCode result = StatusCode.ERROR_UNKNOWN;
-        FileID requestedFileId = command.getFileID();
-        switch (type) {
-            case DF:
-                result = setSelectedApp((DedicatedFileID) requestedFileId) ? StatusCode.SUCCESSFUL_PROCESSING : StatusCode.ERROR_FILE_NOT_FOUND;
-                break;
-            case EF:
-                result = setSelectedEF((ElementaryFileID) requestedFileId) ? StatusCode.SUCCESSFUL_PROCESSING : StatusCode.ERROR_FILE_NOT_FOUND;
-                break;
-        }
-        return new ResponseApdu().setStatusCode(result);
+    public void onSendFailure(Exception exception) {
+
+    }
+
+    @Override
+    public void onReceiveInvalidApdu(ParseException exception) {
+
     }
 
     /**
@@ -146,7 +165,7 @@ public class HolderPresentationLayer implements PresentationLayer, HolderSession
      * @return boolean indicating if the set was successful.
      */
     private boolean setSelectedApp(DedicatedFileID id) {
-        if (id == null || !id.equals(appId)) {
+        if (id == null || !id.equals(this.delegate.getAppId())) {
             return false;
         }
         this.selectedApp = id;
@@ -164,44 +183,10 @@ public class HolderPresentationLayer implements PresentationLayer, HolderSession
         if(selectedApp == null) {
             return false;
         }
-        if (id == null || this.getLocalFile(id) == null) {
+        if (id == null || this.delegate.getLocalFile(id) == null) {
             return false;
         }
         this.selectedEF = id;
         return true;
-    }
-
-    /**
-     * Returns back a local file from this.files. Trying both short and normal.
-     *
-     * @param id elementaryFileID specifying the file
-     * @return an ApduFile
-     */
-    private ApduFile getLocalFile(ElementaryFileID id) {
-        try {
-            short key = id.getShortIDValueAsAShort();
-            if (files.containsKey(key)) {
-                return files.get(key);
-            }
-        } catch (Exception ignored) {
-        }
-        try {
-            short key = id.getNormalIDValueAsAShort();
-            if (files.containsKey(key)) {
-                return files.get(key);
-            }
-        } catch (Exception ignored) {
-        }
-        return null;
-    }
-
-    @Override
-    public void onSendFailure(Exception exception) {
-
-    }
-
-    @Override
-    public void onReceiveInvalidApdu(ParseException exception) {
-
     }
 }

@@ -3,21 +3,23 @@ package com.ul.ims.apdu.interpreter.SessionLayer;
 import com.onehilltech.promises.Promise;
 import com.ul.ims.apdu.encoding.CommandApdu;
 import com.ul.ims.apdu.encoding.ResponseApdu;
-import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.interpreter.Exceptions.OutOfSequenceException;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayer;
 
 import java.util.concurrent.Semaphore;
 
-public class ReaderSessionLayer implements SessionLayer {
+/**
+ * The client session layer handles sending and receiving APDU messages. It also allows for sending APDU commands and keeping track of this open request. Then fulfilling the promise upon receiving data.
+ */
+public class ClientSessionLayer implements SessionLayer {
     private TransportLayer transportLayer;
-    private ReaderSessionLayerDelegate delegate;
+    private SessionLayerDelegate delegate;
 
     private Semaphore openRequestLock = new Semaphore(1);
     private Promise.Settlement<ResponseApdu> openRequest = null;
 
-    public ReaderSessionLayer(TransportLayer transportLayer) {
+    public ClientSessionLayer(TransportLayer transportLayer) {
         this.transportLayer = transportLayer;
         this.transportLayer.setDelegate(this);
     }
@@ -58,7 +60,7 @@ public class ReaderSessionLayer implements SessionLayer {
 
     @Override
     public void setDelegate(SessionLayerDelegate delegate) {
-        this.delegate = (ReaderSessionLayerDelegate) delegate;
+        this.delegate = delegate;
     }
 
     @Override
