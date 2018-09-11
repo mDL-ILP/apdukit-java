@@ -49,9 +49,9 @@ public class ServerSessionLayer implements SessionLayer {
         try {
             CommandApdu request = CommandApdu.fromBytes(data);
             if (request instanceof SelectCommand) {
-                response = this.delegate.receivedSelectRequest((SelectCommand) request);
+                response = this.delegate.receivedSelectCommand((SelectCommand) request);
             } else if (request instanceof ReadBinaryCommand) {
-                response = this.delegate.receivedReadRequest((ReadBinaryCommand) request);
+                response = this.delegate.receivedReadCommand((ReadBinaryCommand) request);
             }
         } catch (ParseException e) {
             this.delegate.onReceiveInvalidApdu(e);

@@ -8,15 +8,15 @@ import com.ul.ims.apdu.interpreter.PresentationLayer.PresentationLayer;
 
 import java.util.concurrent.Semaphore;
 
-public class ReaderApplicationLayer implements ApplicationLayer {
-
-    private PresentationLayer presentationLayer;
-    private DedicatedFileID appId;
+/**
+ * Is a type of application that reads files of that other application it is connected to.
+ */
+public abstract class ReaderApplicationLayer extends ApplicationLayer {
+    //A lock so that we only get one file at a time.
     private Semaphore getFileLock = new Semaphore(1);
 
     public ReaderApplicationLayer(PresentationLayer presentationLayer, DedicatedFileID appId) {
-        this.presentationLayer = presentationLayer;
-        this.appId = appId;
+        super(presentationLayer, appId);
     }
 
     /**
@@ -38,16 +38,13 @@ public class ReaderApplicationLayer implements ApplicationLayer {
         });
     }
 
+    //Reader can only read.
     @Override
     public ApduFile getLocalFile(ElementaryFileID id) {
         return null;
     }
 
-    @Override
-    public DedicatedFileID getAppId() {
-        return this.appId;
-    }
-
+    //Reader doesn't implement check access conditions.
     @Override
     public boolean checkAccessConditions(ElementaryFileID file) {
         return false;

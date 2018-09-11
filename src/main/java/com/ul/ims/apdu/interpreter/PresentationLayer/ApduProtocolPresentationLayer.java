@@ -1,91 +1,30 @@
 package com.ul.ims.apdu.interpreter.PresentationLayer;
 
-import com.onehilltech.promises.Promise;
 import com.ul.ims.apdu.encoding.ReadBinaryCommand;
 import com.ul.ims.apdu.encoding.ReadBinaryShortFileIDCommand;
 import com.ul.ims.apdu.encoding.ResponseApdu;
 import com.ul.ims.apdu.encoding.SelectCommand;
-import com.ul.ims.apdu.encoding.enums.FileControlInfo;
 import com.ul.ims.apdu.encoding.enums.SelectFileType;
 import com.ul.ims.apdu.encoding.enums.StatusCode;
-import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.encoding.types.ApduFile;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 import com.ul.ims.apdu.encoding.types.FileID;
-import com.ul.ims.apdu.interpreter.Exceptions.ResponseApduStatusCodeError;
 import com.ul.ims.apdu.interpreter.SessionLayer.SessionLayer;
 
 import java.util.Arrays;
 
-public class ApduProtocolPresentationLayer implements PresentationLayer {
-    private SessionLayer sessionLayer;
-    private PresentationLayerDelegate delegate;
-
-    //State
-    private DedicatedFileID selectedApp;
-    private ElementaryFileID selectedEF;
+/**
+ *  The handle apdu protocol presentation layer. Extends the base apdu protocol layer with methods to know of to handle requests
+ */
+public class ApduProtocolPresentationLayer extends BaseApduProtocolPresentationLayer {
 
     public ApduProtocolPresentationLayer(SessionLayer sessionLayer) {
-        this.sessionLayer = sessionLayer;
-        this.sessionLayer.setDelegate(this);
-    }
-
-    public Promise selectDF(DedicatedFileID fileID) {
-        SelectCommand command = new SelectCommand();
-        command.setFileControlInfo(FileControlInfo.NOFCIReturn);
-        command.setFileID(fileID);
-
-        return Promise.resolve(selectedApp == fileID)
-                .then(isAlreadySelected -> {
-                    if (isAlreadySelected) {
-                        return Promise.resolve(new ResponseApdu().setStatusCode(StatusCode.SUCCESSFUL_PROCESSING));
-                    }
-                    return this.sessionLayer.send(command);
-                })
-                .then(this::verifySelectResponse)
-                .then(result -> {
-                    selectedApp = fileID;
-                    return Promise.resolve(result);
-                });
-    }
-
-    public Promise selectEF(final ElementaryFileID fileID) {
-        SelectCommand command = new SelectCommand();
-        command.setFileControlInfo(FileControlInfo.NOFCIReturn);
-        command.setFileID(fileID);
-
-        return Promise.resolve(this.selectedEF == fileID)
-                .then(isAlreadySelected -> {
-                    if (isAlreadySelected) {
-                        return Promise.resolve(new ResponseApdu().setStatusCode(StatusCode.SUCCESSFUL_PROCESSING));
-                    }
-                    return this.sessionLayer.send(command);
-                })
-                .then(this::verifySelectResponse)
-                .then(result -> {
-                    this.selectedEF = fileID;
-                    return Promise.resolve(result);
-                });
+        super(sessionLayer);
     }
 
     @Override
-    public void setDelegate(PresentationLayerDelegate delegate) {
-        this.delegate = delegate;
-    }
-
-    private Promise<ResponseApdu> verifySelectResponse(ResponseApdu response) {
-        return new Promise<>(settlement -> {
-            if (response.getStatusCode() == StatusCode.SUCCESSFUL_PROCESSING) {
-                settlement.resolve(response);
-            } else {
-                settlement.reject(new ResponseApduStatusCodeError(response.getStatusCode()));
-            }
-        });
-    }
-
-    @Override
-    public ResponseApdu receivedSelectRequest(SelectCommand command) {
+    public ResponseApdu receivedSelectCommand(SelectCommand command) {
         SelectFileType type = command.getFileType();
         StatusCode result = StatusCode.ERROR_UNKNOWN;
         FileID requestedFileId = command.getFileID();
@@ -101,7 +40,7 @@ public class ApduProtocolPresentationLayer implements PresentationLayer {
     }
 
     @Override
-    public ResponseApdu receivedReadRequest(ReadBinaryCommand command) {
+    public ResponseApdu receivedReadCommand(ReadBinaryCommand command) {
         ResponseApdu response = new ResponseApdu().setStatusCode(StatusCode.ERROR_UNKNOWN);
 
         ElementaryFileID id = this.selectedEF;
@@ -148,16 +87,6 @@ public class ApduProtocolPresentationLayer implements PresentationLayer {
         return response;
     }
 
-    @Override
-    public void onSendFailure(Exception exception) {
-
-    }
-
-    @Override
-    public void onReceiveInvalidApdu(ParseException exception) {
-
-    }
-
     /**
      * Sets the selected app id (DedicatedFileID)and returns if this was successful.
      *
@@ -168,7 +97,7 @@ public class ApduProtocolPresentationLayer implements PresentationLayer {
         if (id == null || !id.equals(this.delegate.getAppId())) {
             return false;
         }
-        this.selectedApp = id;
+        this.selectedDF = id;
         return true;
     }
 
@@ -180,7 +109,7 @@ public class ApduProtocolPresentationLayer implements PresentationLayer {
      */
     private boolean setSelectedEF(ElementaryFileID id) {
         //You can only select an EF after you've selected an app.
-        if(selectedApp == null) {
+        if(selectedDF == null) {
             return false;
         }
         if (id == null || this.delegate.getLocalFile(id) == null) {

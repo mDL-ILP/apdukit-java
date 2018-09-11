@@ -4,20 +4,19 @@ import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
 import com.ul.ims.apdu.encoding.types.ApduFile;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
-import com.ul.ims.apdu.encoding.types.FileID;
 import com.ul.ims.apdu.interpreter.PresentationLayer.PresentationLayer;
 
 import java.util.HashMap;
 
-public class HolderApplicationLayer implements ApplicationLayer {
-    private DedicatedFileID appId;
-
+/**
+ * A holder is a type of application that holds data (files).
+ */
+public abstract class HolderApplicationLayer extends ApplicationLayer {
     //State
     private HashMap<Short, ApduFile> localFiles = new HashMap<>();
 
     public HolderApplicationLayer(PresentationLayer presentationLayer, DedicatedFileID appId) {
-        this.appId = appId;
-        presentationLayer.setDelegate(this);
+        super(presentationLayer, appId);
     }
 
     /**
@@ -70,14 +69,4 @@ public class HolderApplicationLayer implements ApplicationLayer {
         return null;
     }
 
-    @Override
-    public DedicatedFileID getAppId() {
-        return this.appId;
-    }
-
-    //Override this method
-    @Override
-    public boolean checkAccessConditions(ElementaryFileID file) {
-        return true;
-    }
 }
