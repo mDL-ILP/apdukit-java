@@ -60,7 +60,7 @@ public class ReadBinaryShortFileIDCommandBuildTests {
     @Test()
     public void testValidation() throws Exception {
         callValidationCheck("elementaryFileID");
-        subject.setElementaryFileID(ExampleApp.instance.ValidEF1);
+        subject.setElementaryFileID(ExampleApp.instance.ValidShortIdEF1);
         subject.validate();
     }
 

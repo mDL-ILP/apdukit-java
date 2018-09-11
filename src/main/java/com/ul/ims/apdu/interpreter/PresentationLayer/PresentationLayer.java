@@ -8,5 +8,6 @@ import com.ul.ims.apdu.interpreter.SessionLayer.SessionLayerDelegate;
 public interface PresentationLayer extends SessionLayerDelegate {
     Promise selectDF(DedicatedFileID fileID);
     Promise selectEF(final ElementaryFileID fileID);
+    Promise<byte[]> readEF(ElementaryFileID fileID);
     void setDelegate(PresentationLayerDelegate delegate);
 }

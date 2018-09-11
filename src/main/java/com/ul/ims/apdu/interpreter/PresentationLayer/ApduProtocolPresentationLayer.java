@@ -58,7 +58,7 @@ public class ApduProtocolPresentationLayer extends BaseApduProtocolPresentationL
             return response;
         }
         //Check access
-        if (delegate != null && !delegate.checkAccessConditions(id)) {
+        if (delegate != null && !delegate.isFileAllowed(id)) {
             response.setStatusCode(StatusCode.ERROR_SECURITY_STATUS_NOT_SATISFIED);
             return response;
         }

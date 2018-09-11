@@ -1,68 +1,32 @@
 package com.ul.ims.apdu.interpreter;
 
+import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.interpreter.Mocks.TestHolder;
-import com.ul.ims.apdu.interpreter.Mocks.TestReader;
-import com.ul.ims.apdu.interpreter.PresentationLayer.ApduProtocolPresentationLayer;
-import com.ul.ims.apdu.interpreter.PresentationLayer.PresentationLayer;
-import com.ul.ims.apdu.interpreter.SessionLayer.ClientSessionLayer;
-import com.ul.ims.apdu.interpreter.SessionLayer.ServerSessionLayer;
-import com.ul.ims.apdu.interpreter.SessionLayer.SessionLayer;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
-import org.junit.Before;
 import org.junit.Test;
 
-public class HolderIntegrationTests {
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
-    private TransportLayerSimulator holderTransportLayer;
-    private TransportLayerSimulator readerTransportLayer;
-    private SessionLayer holderSessionLayer;
-    private SessionLayer readerSessionLayer;
-    private PresentationLayer holderPresentationLayer;
-    private PresentationLayer readerPresentationLayer;
+public class HolderIntegrationTests extends IntegrationTests {
 
-    private TestHolder holder;
-    private TestReader reader;
-
-    @Before
-    public void setup() {
-        setupTransportLayers();
-    }
-
-    private void setupTransportLayers() {
-        holderTransportLayer = new TransportLayerSimulator();
-        readerTransportLayer = new TransportLayerSimulator();
-        holderTransportLayer.connect(readerTransportLayer);
-        readerTransportLayer.connect(holderTransportLayer);
+    @Test
+    public void testInvalidOnReceive() throws Throwable {
+        //Mock transport layer so it doesn't actually write.
+        this.holderTransportLayer = mock(TransportLayerSimulator.class);
         setupSessionLayers();
-    }
+        this.holder = mock(TestHolder.class);
+        holderPresentationLayer.setDelegate(this.holder);
 
-    private void setupSessionLayers() {
-        holderSessionLayer = new ServerSessionLayer(holderTransportLayer);
-        readerSessionLayer = new ClientSessionLayer(readerTransportLayer);
-        setupPresentationLayers();
-    }
+        //Then call the onReceive function with an invalid apdu.
+        holderSessionLayer.onReceive(new byte[]{0, 0, 1});
 
-    private void setupPresentationLayers() {
-        holderPresentationLayer = new ApduProtocolPresentationLayer(holderSessionLayer);
-        readerPresentationLayer = new ApduProtocolPresentationLayer(readerSessionLayer);
-        setupApplicationLayers();
+        //Verify that the error was reported all the way back to the application
+        verify(this.holder, timeout(100).times(1)).onReceiveInvalidApdu(isA(ParseException.class));
+        //Verify that it sent back a reply saying: Error unknown.
+        verify(this.holderTransportLayer, timeout(100).times(1)).write(new byte[]{(byte) 0x6F, (byte) 0x00});
     }
-
-    private void setupApplicationLayers() {
-        this.holder = new TestHolder(holderPresentationLayer);
-        this.reader = new TestReader(readerPresentationLayer);
-    }
-
-//    @Test
-//    public void test_HolderOnReceive_UnknownError() throws Throwable {
-//        this.transportLayerSimulatorHolder = mock(TransportLayerSimulator.class);
-//        this.sessionLayerHolder = new ServerSessionLayer(transportLayerSimulatorHolder);
-//        this.sessionLayerHolder.setDelegate(this.holder.holderPresentationLayer);
-//
-//        byte[] onReceiveData = new byte[] {(byte) 0x01, (byte) 0x02};
-//        this.sessionLayerHolder.onReceive(onReceiveData);
-//
-//        verify(transportLayerSimulatorHolder, timeout(100).times(1)).write(new byte[]{(byte) 0x6F, (byte) 0x00});//Statuscode.ERROR_UNKNOWN
-//    }
 
 }

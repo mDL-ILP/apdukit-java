@@ -73,7 +73,7 @@ public class SelectCommandBuildTests {
     @Test()
     public void testValidation() throws Exception {
         callValidation("fileID");
-        subject.setFileID(ExampleApp.instance.ValidEF1);
+        subject.setFileID(ExampleApp.instance.ValidShortIdEF1);
         callValidation("fileControlInfo");
         subject.setFileControlInfo(FileControlInfo.NOFCIReturn);
         subject.validate();

@@ -12,7 +12,7 @@ public class TestHolder extends HolderApplicationLayer {
     }
 
     @Override
-    public boolean checkAccessConditions(ElementaryFileID file) {
+    public boolean isFileAllowed(ElementaryFileID file) {
         return true;
     }
 

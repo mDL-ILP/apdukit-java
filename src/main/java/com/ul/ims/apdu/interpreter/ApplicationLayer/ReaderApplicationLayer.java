@@ -32,7 +32,7 @@ public abstract class ReaderApplicationLayer extends ApplicationLayer {
             return Promise.reject(e);
         }
         return this.presentationLayer.selectDF(this.appId).then((res) -> {
-            return this.presentationLayer.selectEF(elementaryFileID);
+            return this.presentationLayer.readEF(elementaryFileID);
         }).always(() -> {
             getFileLock.release();
         });
@@ -46,7 +46,7 @@ public abstract class ReaderApplicationLayer extends ApplicationLayer {
 
     //Reader doesn't implement check access conditions.
     @Override
-    public boolean checkAccessConditions(ElementaryFileID file) {
+    public boolean isFileAllowed(ElementaryFileID file) {
         return false;
     }
 }
