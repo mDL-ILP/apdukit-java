@@ -3,6 +3,7 @@ package com.ul.ims.apdu.interpreter.SessionLayer;
 import com.onehilltech.promises.Promise;
 import com.ul.ims.apdu.encoding.CommandApdu;
 import com.ul.ims.apdu.encoding.ResponseApdu;
+import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.interpreter.Exceptions.OutOfSequenceException;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayer;
@@ -67,6 +68,7 @@ public class ClientSessionLayer implements SessionLayer {
     public void onReceive(byte[] data) {
         //We received an unwanted response?
         if(this.openRequest == null) {
+            this.delegate.onReceiveInvalidApdu(new InvalidApduException("received unwanted response"));
             return;
         }
         try {
@@ -74,6 +76,7 @@ public class ClientSessionLayer implements SessionLayer {
             this.openRequest.resolve(response);
         } catch (ParseException e) {
             this.openRequest.reject(e);
+            this.delegate.onReceiveInvalidApdu(e);
         }
     }
 }

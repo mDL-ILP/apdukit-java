@@ -13,7 +13,7 @@ public class TransportLayerSimulator implements TransportLayer {
     }
 
     @Override
-    public void write(byte[] data) throws IOException, InvalidApduException {
+    public void write(byte[] data) throws IOException {
         if (externalMockTransportLayer == null) {
             throw new SocketException();
         }
