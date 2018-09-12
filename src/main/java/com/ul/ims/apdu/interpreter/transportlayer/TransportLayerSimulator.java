@@ -1,6 +1,5 @@
 package com.ul.ims.apdu.interpreter.transportlayer;
 
-import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import java.io.IOException;
 import java.net.SocketException;
 
