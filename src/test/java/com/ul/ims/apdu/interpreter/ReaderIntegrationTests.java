@@ -140,8 +140,8 @@ public class ReaderIntegrationTests extends IntegrationTests {
         p.getValue();//This will throw the expected exception. Because 0, 0, 1 isn't a valid response apdu.
     }
 
-    @Test(expected = ParseException.class)
-    public void testInvalidOnReceiveWithoutARequest() throws Throwable {
+    @Test
+    public void testInvalidOnReceiveWithoutARequest() {
         //Mock transport layer so it doesn't actually write.
         this.readerTransportLayer = mock(TransportLayerSimulator.class);
         setupSessionLayers();
