@@ -132,6 +132,7 @@ public class ReaderIntegrationTests extends IntegrationTests {
             Assert.fail("Invalid response must not resolve promise.");
             return null;
         });
+        Thread.sleep(100);
         //Then call the onReceive function with an invalid apdu.
         readerSessionLayer.onReceive(new byte[]{0, 0, 1});
 

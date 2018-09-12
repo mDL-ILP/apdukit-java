@@ -17,7 +17,7 @@ public class ReaderSessionLayer implements SessionLayer {
     private TransportLayer transportLayer;
     private SessionLayerDelegate delegate;
 
-    private Semaphore openRequestLock = new Semaphore(1);
+    private Semaphore openRequestLock = new Semaphore(1, true);
     private Promise.Settlement<ResponseApdu> openRequest = null;
 
     public ReaderSessionLayer(TransportLayer transportLayer) {
@@ -40,7 +40,11 @@ public class ReaderSessionLayer implements SessionLayer {
         if(!openRequestLock.tryAcquire()) {//Only one command at a time.
             return Promise.reject(new OutOfSequenceException());
         }
-        return commandToBytes(command).then(this::sendBytes);
+        Promise<ResponseApdu> p = commandToBytes(command).then(this::sendBytes);
+        p.always(() -> {
+            openRequestLock.release();
+        });
+        return p;
     }
 
     private Promise<ResponseApdu> sendBytes(byte[] data) {
@@ -52,6 +56,9 @@ public class ReaderSessionLayer implements SessionLayer {
                 settlement.reject(e);
             }
         });
+        p.always(() -> {
+            openRequest = null;
+        });
         return p;
     }
 
@@ -61,7 +68,7 @@ public class ReaderSessionLayer implements SessionLayer {
     }
 
     @Override
-    public void onReceive(byte[] data) {
+    public synchronized void onReceive(byte[] data) {
         //We received an unwanted response?
         if(this.openRequest == null) {
             this.delegate.onReceiveInvalidApdu(new InvalidApduException("received unwanted response"));
@@ -74,7 +81,5 @@ public class ReaderSessionLayer implements SessionLayer {
             this.openRequest.reject(e);
             this.delegate.onReceiveInvalidApdu(e);
         }
-        openRequestLock.release();
-        openRequest = null;
     }
 }

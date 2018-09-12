@@ -32,14 +32,15 @@ public class HolderSessionLayer implements SessionLayer {
     }
 
     private void sendResponse(ResponseApdu response) {
+        ResponseApdu reply = response;
+        if(reply == null) {
+            reply = new ResponseApdu().setStatusCode(StatusCode.ERROR_UNKNOWN);
+        }
         try {
-            this.transportLayer.write(response.toBytes().toByteArray());
+            this.transportLayer.write(reply.toBytes().toByteArray());
         } catch (Exception e) {
             this.delegate.onSendFailure(e);
-            try {
-                response = new ResponseApdu().setStatusCode(StatusCode.ERROR_UNKNOWN);
-                this.transportLayer.write(response.toBytes().toByteArray());
-            } catch (Exception ignored) {}
+            sendResponse(null);//Send unknown error back.
         }
     }
 
@@ -55,9 +56,6 @@ public class HolderSessionLayer implements SessionLayer {
             }
         } catch (ParseException e) {
             this.delegate.onReceiveInvalidApdu(e);
-        }
-        if(response == null) {
-            response = new ResponseApdu().setStatusCode(StatusCode.ERROR_UNKNOWN);
         }
         sendResponse(response);
     }
