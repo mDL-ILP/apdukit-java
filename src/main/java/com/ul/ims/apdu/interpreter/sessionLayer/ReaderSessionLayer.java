@@ -42,21 +42,24 @@ public class ReaderSessionLayer implements SessionLayer {
         }
         Promise<ResponseApdu> p = commandToBytes(command).then(this::sendBytes);
         p.always(() -> {
-            openRequest = null;
             openRequestLock.release();
         });
         return p;
     }
 
     private synchronized Promise<ResponseApdu> sendBytes(byte[] data) {
-        return new Promise<>(settlement -> {
+        Promise<ResponseApdu> p = new Promise<>(settlement -> {
+            openRequest = settlement;
             try {
-                openRequest = settlement;
                 transportLayer.write(data);
             } catch (Exception e) {
                 settlement.reject(e);
             }
         });
+        p.always(() -> {
+            openRequest = null;
+        });
+        return p;
     }
 
     @Override
