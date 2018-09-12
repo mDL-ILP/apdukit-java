@@ -36,18 +36,14 @@ public class ReaderSessionLayer implements SessionLayer {
     }
 
     @Override
-    public Promise<ResponseApdu> send(CommandApdu command) {
+    public synchronized Promise<ResponseApdu> send(CommandApdu command) {
         if(!openRequestLock.tryAcquire()) {//Only one command at a time.
             return Promise.reject(new OutOfSequenceException());
         }
-        Promise<ResponseApdu> p = commandToBytes(command).then(this::sendBytes);
-        p.always(() -> {
-            openRequestLock.release();
-        });
-        return p;
+        return commandToBytes(command).then(this::sendBytes);
     }
 
-    private synchronized Promise<ResponseApdu> sendBytes(byte[] data) {
+    private Promise<ResponseApdu> sendBytes(byte[] data) {
         Promise<ResponseApdu> p = new Promise<>(settlement -> {
             openRequest = settlement;
             try {
@@ -55,9 +51,6 @@ public class ReaderSessionLayer implements SessionLayer {
             } catch (Exception e) {
                 settlement.reject(e);
             }
-        });
-        p.always(() -> {
-            openRequest = null;
         });
         return p;
     }
@@ -81,5 +74,7 @@ public class ReaderSessionLayer implements SessionLayer {
             this.openRequest.reject(e);
             this.delegate.onReceiveInvalidApdu(e);
         }
+        openRequestLock.release();
+        openRequest = null;
     }
 }
