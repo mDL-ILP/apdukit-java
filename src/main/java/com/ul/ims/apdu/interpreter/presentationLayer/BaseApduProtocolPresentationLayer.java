@@ -72,77 +72,28 @@ abstract class BaseApduProtocolPresentationLayer implements PresentationLayer {
     }
 
     /**
-     * Routes call to right EF read. If short it'll use the short id otherwise it'll use the normal.
-     * @param fileID
-     * @return
+     * Read contents of EF using shortID.
+     * @param fileID specifying the file
+     * @param offset the offset of the data. Cannot exceed the file size.
+     * @return bytes of the file
      */
-    public Promise<byte[]> readEF(ElementaryFileID fileID) {
-        return openApduFile(fileID).then((file) -> this.resolveApduFile(file));
-    }
-
-    /**
-     * Creates the intial first part of a APDU file by selecting the ElementaryFileID on at the holder and read a few initial bytes.
-     * @param fileID
-     * @return
-     */
-    private Promise<ApduFile> openApduFile(ElementaryFileID fileID) {
-        Promise<byte[]> promise;
-        //If short file id is available, a read will also instantly select the file.
-        if (fileID.isShortIDAvailable()) {
-            promise = this.readEFShortID(fileID, (byte)0);
-        } else {
-            promise = this.selectEF(fileID).then((v) -> readSelectedEF((byte)0));//Select and read the first part.
-        }
-        return promise.then((data) -> {
-            try {
-                ApduFile result = new ApduFile(data);
-                return Promise.resolve(result);
-            }catch (Exception e) {
-                return Promise.reject(e);
-            }
-        });
-    }
-
-    /**
-     * This method will take a complete or incomplete APDu file and keeps reading until it is complete. Then return the bytes.
-     * @param file APDU file. Created by reading the first 5 bytes or part of the file.\
-     * @return
-     */
-    private Promise<byte[]> resolveApduFile(ApduFile file) {
-        if(file == null) {
-            return Promise.reject(new InvalidApduFileException("File is null"));
-        }
-        return new Promise<>(settlement -> {
-            while (!file.isComplete()) {
-                short offset = file.getCurrentSize();
-                Promise<byte[]> promise = readSelectedEF(offset);
-                try {
-                    byte[] data = promise.getValue();
-                    file.appendValue(data);
-                }  catch (Throwable e) {
-                    settlement.reject(e);
-                }
-            }
-            settlement.resolve(file.getData());
-        });
-    }
-
-    //Read contents of EF using shortID.
-    private Promise<byte[]> readEFShortID(ElementaryFileID fileID, byte offset) {
-        ReadBinaryShortFileIDCommand command = new ReadBinaryShortFileIDCommand();
-        command.setOffset(offset);
-        command.setElementaryFileID(fileID);
+    public Promise<byte[]> readBinary(ElementaryFileID fileID, byte offset) {
+        ReadBinaryShortFileIDCommand command = new ReadBinaryShortFileIDCommand()
+                .setOffset(offset)
+                .setElementaryFileID(fileID);
         command.setMaximumExpectedLength(maxExpLength);
         return this.sessionLayer.send(command).then(this::readReadBinaryResponse);
     }
 
-    //Read contents of EF using normalID.
-    //The EF must first be selected.
-    private Promise<byte[]> readSelectedEF(short offset) {
-        ReadBinaryOffsetCommand command = new ReadBinaryOffsetCommand();
-        command.setOffset(offset);
+    /**
+     * Read contents of EF using normalID. The EF must first be selected.
+     * @param offset the offset of the data. Cannot exceed the file size.
+     * @return bytes of the file
+     */
+    public Promise<byte[]> readBinary(short offset) {
+        ReadBinaryOffsetCommand command = new ReadBinaryOffsetCommand()
+        .setOffset(offset);
         command.setMaximumExpectedLength(maxExpLength);
-
         return this.sessionLayer.send(command).then(this::readReadBinaryResponse);
     }
 

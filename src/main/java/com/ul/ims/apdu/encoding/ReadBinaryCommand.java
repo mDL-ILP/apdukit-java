@@ -57,8 +57,9 @@ public abstract class ReadBinaryCommand extends CommandApdu {
         return new ReadBinaryOffsetCommand(stream);
     }
 
-    public void setMaximumExpectedLength(int size) {
+    public ReadBinaryCommand setMaximumExpectedLength(int size) {
         this.maximumExpectedLength = size;
+        return this;
     }
 
     public int getMaximumExpectedLength() {

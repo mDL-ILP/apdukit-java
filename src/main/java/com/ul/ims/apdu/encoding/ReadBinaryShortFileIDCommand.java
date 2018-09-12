@@ -57,8 +57,9 @@ public class ReadBinaryShortFileIDCommand extends ReadBinaryCommand {
         return stream;
     }
 
-    public void setElementaryFileID(ElementaryFileID elementaryFileID) {
+    public ReadBinaryShortFileIDCommand setElementaryFileID(ElementaryFileID elementaryFileID) {
         this.elementaryFileID = elementaryFileID;
+        return this;
     }
 
     public ElementaryFileID getElementaryFileID() {
