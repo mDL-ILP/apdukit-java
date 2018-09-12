@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * Application Protocol Data Unit
  */
-interface Apdu {
+public interface Apdu {
     /**
      * Validate Apdu. Each type will throw if values aren't set etc.
      */

@@ -1,10 +1,10 @@
 package com.ul.ims.apdu.encoding;
 
 
+import com.ul.ims.apdu.encoding.enums.FileControlInfo;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.ul.ims.apdu.encoding.enums.FileControlInfo;
 import com.ul.ims.apdu.encoding.exceptions.ValueNotSetException;
 import com.ul.ims.apdu.apps.ExampleApp;
 
@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 //All the build tests to go from an object to bytes.
 public class SelectCommandBuildTests {
 
-    private SelectCommand subject;
+    SelectCommand subject;
 
     @Before
     public void runBeforeTestMethod() {
@@ -73,7 +73,7 @@ public class SelectCommandBuildTests {
     @Test()
     public void testValidation() throws Exception {
         callValidation("fileID");
-        subject.setFileID(ExampleApp.instance.ValidEF1);
+        subject.setFileID(ExampleApp.instance.ValidShortIdEF1);
         callValidation("fileControlInfo");
         subject.setFileControlInfo(FileControlInfo.NOFCIReturn);
         subject.validate();

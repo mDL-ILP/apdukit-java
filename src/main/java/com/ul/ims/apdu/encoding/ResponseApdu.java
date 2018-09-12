@@ -2,7 +2,7 @@ package com.ul.ims.apdu.encoding;
 
 import com.ul.ims.apdu.encoding.enums.StatusCode;
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
-import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
+import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.encoding.exceptions.ValueNotSetException;
 import com.ul.ims.apdu.encoding.utilities.ConversionUtils;
 
@@ -75,6 +75,13 @@ public class ResponseApdu implements Apdu {
         } catch (Exception e) {
             throw new InvalidApduException(e.getMessage());
         }
+    }
+
+    /**
+     * Apdu from bytes. Routes and initializes the right response apdu response subclass.
+     */
+    public static ResponseApdu fromBytes(byte[] buf) throws ParseException {
+        return new ResponseApdu(new ByteArrayInputStreamExtension(buf));
     }
 
     @Override

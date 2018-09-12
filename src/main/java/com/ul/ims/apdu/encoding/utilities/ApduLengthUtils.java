@@ -60,10 +60,10 @@ public class ApduLengthUtils {
      * @throws InvalidNumericException
      */
     public static short decodeDataLength(ByteArrayInputStreamExtension stream) throws ParseException {
-        if(stream == null) {
-            throw new ParseException("Data length not provided");
-        }
         Byte firstByte = stream.readByte();
+        if(firstByte == null) {
+            throw new ParseException("Not enough bytes given to read data length.");
+        }
         boolean isExtendedLength = firstByte == 0;
 
         short result = 0;//length
@@ -89,9 +89,6 @@ public class ApduLengthUtils {
      * @return byte array representing the given length.
      */
     public static byte[] encodeDataLength(short length) {
-        if(length == Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED) {
-            return new byte[]{0x00, 0x00};
-        }
         if (length == 256) {
             return new byte[]{0x00};
         }
@@ -104,14 +101,19 @@ public class ApduLengthUtils {
         return new byte[]{parts[1]};
     }
 
+    /**
+     * For a given max expected length encode it into bytes.
+     * Now this length is a short. But we use int because the standard overflows a short with the value 65536 which is 1 more than a short. The standard replaces the value 0 for the value 65536.
+     */
     public static byte[] encodeMaxExpectedLength(int length) throws InvalidNumericException {
-        if (length == Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED) {
-            return new byte[] {0x00, 0x00};
+        if(length == Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED) {
+            return new byte[]{0x00, 0x00};
         }
+        //Check if it doesn't overflow a short.
         if (length > Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED) {
-            throw new InvalidNumericException("length > Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED");
+            throw new InvalidNumericException("max expected length overflows extended length.");
         }
-        return encodeDataLength((short) length);
+        return encodeDataLength((short)length);
     }
 }
 

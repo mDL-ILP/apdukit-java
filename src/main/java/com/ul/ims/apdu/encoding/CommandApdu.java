@@ -19,7 +19,7 @@ public abstract class CommandApdu implements Apdu {
     InstructionClass instructionClass = InstructionClass.DEFAULT;
     InstructionCode instructionCode;
 
-    CommandApdu(ByteArrayInputStreamExtension stream) throws InvalidApduException {
+    CommandApdu(ByteArrayInputStreamExtension stream) {
         this.instructionClass = InstructionClass.valueOf(stream.readByte());
         this.instructionCode = InstructionCode.valueOf(stream.readByte());
     }
@@ -41,12 +41,12 @@ public abstract class CommandApdu implements Apdu {
     }
 
     /**
-     * Apdu from bytes. Routes and initializes the right apdu subclass depending on the instructionCode
+     * Apdu from bytes. Routes and initializes the right command APDU subclass depending on the instructionCode
      */
-    public static CommandApdu fromBytes(byte[] buf) throws Exception {
+    public static CommandApdu fromBytes(byte[] buf) throws ParseException {
         ByteArrayInputStreamExtension stream = new ByteArrayInputStreamExtension(buf);
         if(stream.available() < 4) {
-            throw new ParseException("data should be at least 4 long");
+            throw new InvalidApduException("data should be at least 4 long");
         }
         stream.skip(1);//Skip instruction class.
         InstructionCode instructionCode = InstructionCode.valueOf(stream.readByte());

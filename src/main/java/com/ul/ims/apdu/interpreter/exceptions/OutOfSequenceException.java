@@ -1,4 +1,4 @@
-package com.ul.ims.apdu.interpreter.Exceptions;
+package com.ul.ims.apdu.interpreter.exceptions;
 
 import java.io.IOException;
 

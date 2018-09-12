@@ -4,7 +4,7 @@ import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 
 public class ConversionUtilsTests {
@@ -18,7 +18,7 @@ public class ConversionUtilsTests {
     }
 
     @Test
-    public void successfulBytesToShort() throws InvalidNumericException {
+    public void testBytesToShort() throws InvalidNumericException {
         byte[] input = new byte[] {(byte) 0x01, (byte) 0x05};
         short expected = (short)261;
 
@@ -26,7 +26,7 @@ public class ConversionUtilsTests {
     }
 
     @Test
-    public void successfulBytesToShort2() throws InvalidNumericException {
+    public void testBytesToShort2() throws InvalidNumericException {
         byte[] input = new byte[] {(byte) 7};
         short expected = (short)7;
 
@@ -34,7 +34,7 @@ public class ConversionUtilsTests {
     }
 
     @Test
-    public void successfulBytesToShort3() throws InvalidNumericException {
+    public void testBytesToShort3() throws InvalidNumericException {
         byte[] input = new byte[] {(byte) 0x00, (byte) 0xff};
         short expected = (short)255;
 
@@ -42,13 +42,13 @@ public class ConversionUtilsTests {
     }
 
     @Test(expected = InvalidNumericException.class)
-    public void successfulBytesToShort4() throws InvalidNumericException {
+    public void testBytesToShort4() throws InvalidNumericException {
         byte[] input = new byte[] {(byte) 0x00, (byte) 0xff, (byte) 0xff};
         ConversionUtils.fromBytesToShort(input);
     }
 
     @Test
-    public void successfulShortToBytes() {
+    public void testShortToBytes() {
         short value = (short) 0x9000;
         assertArrayEquals(new byte[]{(byte)0x90, (byte) 0x00}, ConversionUtils.fromShortToBytes(value));
     }
@@ -66,8 +66,12 @@ public class ConversionUtilsTests {
 
     @Test
     public void testBytesToBits() {
-        byte[] input = new byte[]{1, 3};
+        byte[] input = new byte[]{1};
         byte[] result = ConversionUtils.bytesToBits(input);
+        assertArrayEquals(new byte[]{0, 0, 0, 0, 0, 0, 0, 1}, result);
+
+        input = new byte[]{1, 3};
+        result = ConversionUtils.bytesToBits(input);
         assertArrayEquals(new byte[]{0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1}, result);
     }
 

@@ -1,19 +1,18 @@
-package com.ul.ims.apdu.interpreter.TransportLayer;
+package com.ul.ims.apdu.interpreter.transportlayer;
 
-import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import java.io.IOException;
 import java.net.SocketException;
 
 public class TransportLayerSimulator implements TransportLayer {
     private TransportLayerDelegate delegate;
-    private TransportLayer externalMockTransportLayer = null;
+    private TransportLayerSimulator externalMockTransportLayer = null;
 
-    public void connect(TransportLayer transportLayer) {
+    public void connect(TransportLayerSimulator transportLayer) {
         externalMockTransportLayer = transportLayer;
     }
 
     @Override
-    public void write(byte[] data) throws IOException, InvalidApduException {
+    public void write(byte[] data) throws IOException {
         if (externalMockTransportLayer == null) {
             throw new SocketException();
         }
@@ -25,8 +24,8 @@ public class TransportLayerSimulator implements TransportLayer {
         externalMockTransportLayer = null;
     }
 
-    @Override
-    public void onReceive(byte[] data) throws IOException, InvalidApduException {
+    //Simulate a onReceive
+    public void onReceive(byte[] data) throws IOException {
         if(this.delegate == null) {
             throw new SocketException();
         }

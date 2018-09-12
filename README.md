@@ -23,7 +23,7 @@ buildscript {
 
 dependencies {
   # for JVM-only projects
-  implement com.ul-ts.apdukit:apdukit:x.y.z
+  implement com.github.mDL-ILP:apdukit-java:x.y.z
 }
 ```
 

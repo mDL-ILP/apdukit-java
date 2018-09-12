@@ -42,10 +42,10 @@ public class ConversionUtils {
         final byte[] bits = new byte[8 * bytes.length];
         int bitsIndex = 0;
 
-        for (final byte bbyte : bytes) {
-            final byte[] bitsFromByte = toBitArray(bbyte);
+        for (final byte _byte : bytes) {
+            final byte[] bitsFromByte = byteToBits(_byte);
             System.arraycopy(bitsFromByte, 0, bits, bitsIndex, 8);
-            bitsIndex+=8;
+            bitsIndex +=8;
         }
 
         return bits;
@@ -53,30 +53,21 @@ public class ConversionUtils {
 
     /**
      * converts byte to an array of bits
-     * @param bbyte byte
+     * @param value byte
      * @return array of bits max 8 long.
      */
-    public static byte[] toBitArray(final byte bbyte) {
-        final byte[] bitArray = new byte[8];
-        bitArray[7] = (byte) ((bbyte & 0x1) != 0 ? 1 : 0);
-        bitArray[6] = (byte) ((bbyte & 0x2) != 0 ? 1 : 0);
-        bitArray[5] = (byte) ((bbyte & 0x4) != 0 ? 1 : 0);
-        bitArray[4] = (byte) ((bbyte & 0x8) != 0 ? 1 : 0);
-        bitArray[3] = (byte) ((bbyte & 0x10) != 0 ? 1 : 0);
-        bitArray[2] = (byte) ((bbyte & 0x20) != 0 ? 1 : 0);
-        bitArray[1] = (byte) ((bbyte & 0x40) != 0 ? 1 : 0);
-        bitArray[0] = (byte) ((bbyte & 0x80) != 0 ? 1 : 0);
+    public static byte[] byteToBits(final byte value) {
+        final byte[] result = new byte[8];
+        result[7] = (byte) ((value & 0x1) != 0 ? 1 : 0);
+        result[6] = (byte) ((value & 0x2) != 0 ? 1 : 0);
+        result[5] = (byte) ((value & 0x4) != 0 ? 1 : 0);
+        result[4] = (byte) ((value & 0x8) != 0 ? 1 : 0);
+        result[3] = (byte) ((value & 0x10) != 0 ? 1 : 0);
+        result[2] = (byte) ((value & 0x20) != 0 ? 1 : 0);
+        result[1] = (byte) ((value & 0x40) != 0 ? 1 : 0);
+        result[0] = (byte) ((value & 0x80) != 0 ? 1 : 0);
 
-        return  bitArray;
-    }
-
-    /**
-     * converts byte to bits
-     * @param b byte
-     * @return array of bits max 8 long.
-     */
-    public static byte[] byteToBits(byte b) {
-        return bytesToBits(new byte[]{b});
+        return  result;
     }
 
     /**

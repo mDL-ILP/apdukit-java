@@ -27,7 +27,7 @@ public class SelectCommand extends CommandApdu {
         super(InstructionCode.SELECT);
     }
 
-    public SelectCommand(ByteArrayInputStreamExtension stream) throws Exception {
+    public SelectCommand(ByteArrayInputStreamExtension stream) throws ParseException {
         super(stream);
         this.fileType = SelectFileType.valueOf(stream.readByte());
         this.fileControlInfo = FileControlInfo.valueOf(stream.readByte());
