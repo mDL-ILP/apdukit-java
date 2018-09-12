@@ -8,7 +8,7 @@ import java.util.Map;
  * English: Indicates what kind of data we want returned in the ResponseApdu after a command
  */
 public enum FileControlInfo {
-    //Return no file control info.
+    /// Return no file control info.
     NOFCIReturn((byte)0x0C);
 
     public byte getValue() {
