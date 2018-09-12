@@ -79,4 +79,9 @@ public class ReaderSessionLayer implements SessionLayer {
             this.delegate.onReceiveInvalidApdu(e);
         }
     }
+
+    @Override
+    public void onEvent(String string, int i) {
+
+    }
 }
