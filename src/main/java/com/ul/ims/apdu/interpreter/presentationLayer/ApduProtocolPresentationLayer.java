@@ -4,7 +4,7 @@ import com.ul.ims.apdu.encoding.ReadBinaryCommand;
 import com.ul.ims.apdu.encoding.ReadBinaryShortFileIDCommand;
 import com.ul.ims.apdu.encoding.ResponseApdu;
 import com.ul.ims.apdu.encoding.SelectCommand;
-import com.ul.ims.apdu.encoding.enums.SelectFileType;
+import com.ul.ims.apdu.encoding.enums.FileType;
 import com.ul.ims.apdu.encoding.enums.StatusCode;
 import com.ul.ims.apdu.encoding.types.ApduFile;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
@@ -25,7 +25,7 @@ public class ApduProtocolPresentationLayer extends BaseApduProtocolPresentationL
 
     @Override
     public ResponseApdu receivedSelectCommand(SelectCommand command) {
-        SelectFileType type = command.getFileType();
+        FileType type = command.getFileType();
         StatusCode result = StatusCode.ERROR_UNKNOWN;
         FileID requestedFileId = command.getFileID();
         switch (type) {

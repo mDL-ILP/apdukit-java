@@ -29,52 +29,46 @@ abstract class BaseApduProtocolPresentationLayer implements PresentationLayer {
         this.sessionLayer.setDelegate(this);
     }
 
+    /**
+     * Select a dedicated file (app)
+     * @param fileID
+     * @return
+     */
     public Promise selectDF(DedicatedFileID fileID) {
-        SelectCommand command = new SelectCommand();
-        command.setFileControlInfo(FileControlInfo.NOFCIReturn);
-        command.setFileID(fileID);
+        if(selectedDF == fileID) {
+            return Promise.resolve(null);
+        }
+        SelectCommand command = new SelectCommand()
+                .setFileControlInfo(FileControlInfo.NOFCIReturn)
+                .setFileID(fileID);
 
-        return Promise.resolve(selectedDF == fileID)
-                .then(isAlreadySelected -> {
-                    if (isAlreadySelected) {
-                        return Promise.resolve(new ResponseApdu().setStatusCode(StatusCode.SUCCESSFUL_PROCESSING));
-                    }
-                    return this.sessionLayer.send(command);
-                })
-                .then(this::verifySelectResponse)
+        return this.sessionLayer.send(command)
+                .then(this::readSelectResponse)
                 .then(result -> {
                     selectedDF = fileID;
                     return Promise.resolve(result);
                 });
     }
 
+    /**
+     * Select an elementary file (file, datagroup)
+     * @param fileID
+     * @return
+     */
     public Promise selectEF(final ElementaryFileID fileID) {
-        SelectCommand command = new SelectCommand();
-        command.setFileControlInfo(FileControlInfo.NOFCIReturn);
-        command.setFileID(fileID);
+        if(this.selectedEF == fileID) {
+            return Promise.resolve(null);
+        }
+        SelectCommand command = new SelectCommand()
+                .setFileControlInfo(FileControlInfo.NOFCIReturn)
+                .setFileID(fileID);
 
-        return Promise.resolve(this.selectedEF == fileID)
-                .then(isAlreadySelected -> {
-                    if (isAlreadySelected) {
-                        return Promise.resolve(new ResponseApdu().setStatusCode(StatusCode.SUCCESSFUL_PROCESSING));
-                    }
-                    return this.sessionLayer.send(command);
-                })
-                .then(this::verifySelectResponse)
+        return this.sessionLayer.send(command)
+                .then(this::readSelectResponse)
                 .then(result -> {
-                    this.selectedEF = fileID;
+                    selectedEF = fileID;
                     return Promise.resolve(result);
                 });
-    }
-
-    private Promise<ResponseApdu> verifySelectResponse(ResponseApdu response) {
-        return new Promise<>(settlement -> {
-            if (response.getStatusCode() == StatusCode.SUCCESSFUL_PROCESSING) {
-                settlement.resolve(response);
-            } else {
-                settlement.reject(new ResponseApduStatusCodeError(response.getStatusCode()));
-            }
-        });
     }
 
     /**
@@ -83,7 +77,7 @@ abstract class BaseApduProtocolPresentationLayer implements PresentationLayer {
      * @return
      */
     public Promise<byte[]> readEF(ElementaryFileID fileID) {
-        return selectApduFile(fileID).then((file) -> this.resolveApduFile(file));
+        return openApduFile(fileID).then((file) -> this.resolveApduFile(file));
     }
 
     /**
@@ -91,25 +85,21 @@ abstract class BaseApduProtocolPresentationLayer implements PresentationLayer {
      * @param fileID
      * @return
      */
-    private Promise<ApduFile> selectApduFile(ElementaryFileID fileID) {
-        return new Promise<>(settlement -> {
-            ApduFile result;
-            Promise<byte[]> promise;
-            final byte offset = (byte)0;
-            //If short file id is available, a read will also instantly select the file.
-            if (fileID.isShortIDAvailable()) {
-                promise = this.readEFShortID(fileID, offset);
-            } else {
-                promise = this.selectEF(fileID).then((v) -> readSelectedEF(offset));//Select and read the first part.
-            }
+    private Promise<ApduFile> openApduFile(ElementaryFileID fileID) {
+        Promise<byte[]> promise;
+        //If short file id is available, a read will also instantly select the file.
+        if (fileID.isShortIDAvailable()) {
+            promise = this.readEFShortID(fileID, (byte)0);
+        } else {
+            promise = this.selectEF(fileID).then((v) -> readSelectedEF((byte)0));//Select and read the first part.
+        }
+        return promise.then((data) -> {
             try {
-                byte[] data = promise.getValue();
-                result = new ApduFile(data);
-            } catch (Throwable e) {
-                settlement.reject(e);
-                return;
+                ApduFile result = new ApduFile(data);
+                return Promise.resolve(result);
+            }catch (Exception e) {
+                return Promise.reject(e);
             }
-            settlement.resolve(result);
         });
     }
 
@@ -143,7 +133,7 @@ abstract class BaseApduProtocolPresentationLayer implements PresentationLayer {
         command.setOffset(offset);
         command.setElementaryFileID(fileID);
         command.setMaximumExpectedLength(maxExpLength);
-        return this.sessionLayer.send(command).then(this::verifyReadBinaryResponse);
+        return this.sessionLayer.send(command).then(this::readReadBinaryResponse);
     }
 
     //Read contents of EF using normalID.
@@ -153,18 +143,39 @@ abstract class BaseApduProtocolPresentationLayer implements PresentationLayer {
         command.setOffset(offset);
         command.setMaximumExpectedLength(maxExpLength);
 
-        return this.sessionLayer.send(command).then(this::verifyReadBinaryResponse);
+        return this.sessionLayer.send(command).then(this::readReadBinaryResponse);
     }
 
-    private Promise<byte[]> verifyReadBinaryResponse(ResponseApdu result) {
-        StatusCode resultStatus = result.getStatusCode();
-        return new Promise<>(settlement -> {
-            if(resultStatus == StatusCode.SUCCESSFUL_PROCESSING || resultStatus == StatusCode.WARNING_END_OF_FILE) {
-                settlement.resolve(result.getData());
-                return;
+    /**
+     * Reads the response APDU and returns a new promise that will be rejected if the status code is not SUCCESSFUL
+     * @param response
+     * @return promise with the response
+     */
+    private Promise<ResponseApdu> readSelectResponse(ResponseApdu response) {
+        StatusCode statusCode = response.getStatusCode();
+        if(statusCode == StatusCode.SUCCESSFUL_PROCESSING) {
+            return Promise.resolve(response);
+        } else {
+            return Promise.reject(new ResponseApduStatusCodeError(statusCode));
+        }
+    }
+
+    /**
+     * Reads the response APDU and returns the data of the response
+     * @param response
+     * @return the binary data from the response
+     */
+    private Promise<byte[]> readReadBinaryResponse(ResponseApdu response) {
+        StatusCode statusCode = response.getStatusCode();
+        if(statusCode == StatusCode.SUCCESSFUL_PROCESSING || statusCode == StatusCode.WARNING_END_OF_FILE) {
+            byte[] data = response.getData();
+            if(data != null) {
+                return Promise.resolve(data);
             }
-            settlement.reject(new ResponseApduStatusCodeError(resultStatus));
-        });
+            return Promise.reject(new Exception("No data in response"));
+        } else {
+            return Promise.reject(new ResponseApduStatusCodeError(statusCode));
+        }
     }
 
     @Override

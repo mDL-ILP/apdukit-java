@@ -1,7 +1,7 @@
 package com.ul.ims.apdu.encoding;
 
 import com.ul.ims.apdu.encoding.enums.FileControlInfo;
-import com.ul.ims.apdu.encoding.enums.SelectFileType;
+import com.ul.ims.apdu.encoding.enums.FileType;
 import com.ul.ims.apdu.apps.ExampleApp;
 
 import org.junit.Test;
@@ -24,7 +24,7 @@ public class SelectCommandParseTests {
         CommandApdu command = CommandApdu.fromBytes(input);
         assertTrue(command instanceof SelectCommand);
         SelectCommand result = (SelectCommand) command;
-        assertEquals(SelectFileType.DF, result.getFileType());
+        assertEquals(FileType.DF, result.getFileType());
         assertEquals(FileControlInfo.NOFCIReturn,result.getFileControlInfo());
         assertNotNull(result.getFileID());
         assertArrayEquals(ExampleApp.instance.ValidDF_NormalLength2.getValue(), result.getFileID().getValue());
@@ -40,7 +40,7 @@ public class SelectCommandParseTests {
             CommandApdu command = CommandApdu.fromBytes(stream.toByteArray());
             assertTrue(command instanceof SelectCommand);
             SelectCommand result = (SelectCommand) command;
-            assertEquals(SelectFileType.DF, result.getFileType());
+            assertEquals(FileType.DF, result.getFileType());
             assertEquals(FileControlInfo.NOFCIReturn, result.getFileControlInfo());
             assertArrayEquals(ExampleApp.instance.ValidDF_ExtendedLength.getValue(), result.getFileID().getValue());
         } catch (Exception e) {
@@ -54,7 +54,7 @@ public class SelectCommandParseTests {
         CommandApdu command = CommandApdu.fromBytes(data);
         assertTrue(command instanceof SelectCommand);
         SelectCommand result = (SelectCommand) command;
-        assertEquals(SelectFileType.EF, result.getFileType());
+        assertEquals(FileType.EF, result.getFileType());
         assertEquals(FileControlInfo.NOFCIReturn,result.getFileControlInfo());
         assertArrayEquals(ExampleApp.instance.ValidEF_NoShortId.getNormalIdentifier(), result.getFileID().getValue());
     }
