@@ -1,4 +1,4 @@
-package com.ul.ims.apdu.interpreter.PresentationLayer;
+package com.ul.ims.apdu.interpreter.presentationLayer;
 
 import com.onehilltech.promises.Promise;
 import com.ul.ims.apdu.encoding.*;
@@ -9,8 +9,8 @@ import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.encoding.types.ApduFile;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
-import com.ul.ims.apdu.interpreter.Exceptions.ResponseApduStatusCodeError;
-import com.ul.ims.apdu.interpreter.SessionLayer.SessionLayer;
+import com.ul.ims.apdu.interpreter.exceptions.ResponseApduStatusCodeError;
+import com.ul.ims.apdu.interpreter.sessionLayer.SessionLayer;
 
 /**
  * The base APDU protocol presentation layer. It keeps state of what DF and EF are selected. Exposes methods to select DF or EF.

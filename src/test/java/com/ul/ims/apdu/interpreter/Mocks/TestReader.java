@@ -2,8 +2,8 @@ package com.ul.ims.apdu.interpreter.Mocks;
 
 import com.ul.ims.apdu.apps.ExampleApp;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
-import com.ul.ims.apdu.interpreter.ApplicationLayer.ReaderApplicationLayer;
-import com.ul.ims.apdu.interpreter.PresentationLayer.PresentationLayer;
+import com.ul.ims.apdu.interpreter.applicationLayer.ReaderApplicationLayer;
+import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayer;
 
 public class TestReader extends ReaderApplicationLayer {
     public TestReader(PresentationLayer presentationLayer) {

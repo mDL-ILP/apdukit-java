@@ -1,10 +1,10 @@
-package com.ul.ims.apdu.interpreter.ApplicationLayer;
+package com.ul.ims.apdu.interpreter.applicationLayer;
 
 import com.onehilltech.promises.Promise;
 import com.ul.ims.apdu.encoding.types.ApduFile;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
-import com.ul.ims.apdu.interpreter.PresentationLayer.PresentationLayer;
+import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayer;
 
 import java.util.concurrent.Semaphore;
 

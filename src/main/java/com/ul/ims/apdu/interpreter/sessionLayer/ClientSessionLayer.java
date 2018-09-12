@@ -1,11 +1,11 @@
-package com.ul.ims.apdu.interpreter.SessionLayer;
+package com.ul.ims.apdu.interpreter.sessionLayer;
 
 import com.onehilltech.promises.Promise;
 import com.ul.ims.apdu.encoding.CommandApdu;
 import com.ul.ims.apdu.encoding.ResponseApdu;
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
-import com.ul.ims.apdu.interpreter.Exceptions.OutOfSequenceException;
+import com.ul.ims.apdu.interpreter.exceptions.OutOfSequenceException;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayer;
 
 import java.util.concurrent.Semaphore;

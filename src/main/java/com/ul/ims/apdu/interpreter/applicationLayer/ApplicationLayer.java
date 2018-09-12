@@ -1,8 +1,8 @@
-package com.ul.ims.apdu.interpreter.ApplicationLayer;
+package com.ul.ims.apdu.interpreter.applicationLayer;
 
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
-import com.ul.ims.apdu.interpreter.PresentationLayer.PresentationLayer;
-import com.ul.ims.apdu.interpreter.PresentationLayer.PresentationLayerDelegate;
+import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayer;
+import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayerDelegate;
 
 /**
  * Base class for a type of application.

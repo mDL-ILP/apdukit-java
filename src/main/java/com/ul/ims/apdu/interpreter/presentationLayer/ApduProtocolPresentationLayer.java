@@ -1,4 +1,4 @@
-package com.ul.ims.apdu.interpreter.PresentationLayer;
+package com.ul.ims.apdu.interpreter.presentationLayer;
 
 import com.ul.ims.apdu.encoding.ReadBinaryCommand;
 import com.ul.ims.apdu.encoding.ReadBinaryShortFileIDCommand;
@@ -10,7 +10,7 @@ import com.ul.ims.apdu.encoding.types.ApduFile;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 import com.ul.ims.apdu.encoding.types.FileID;
-import com.ul.ims.apdu.interpreter.SessionLayer.SessionLayer;
+import com.ul.ims.apdu.interpreter.sessionLayer.SessionLayer;
 
 import java.util.Arrays;
 

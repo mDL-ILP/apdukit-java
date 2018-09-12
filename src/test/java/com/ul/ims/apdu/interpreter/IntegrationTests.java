@@ -2,11 +2,11 @@ package com.ul.ims.apdu.interpreter;
 
 import com.ul.ims.apdu.interpreter.Mocks.TestHolder;
 import com.ul.ims.apdu.interpreter.Mocks.TestReader;
-import com.ul.ims.apdu.interpreter.PresentationLayer.ApduProtocolPresentationLayer;
-import com.ul.ims.apdu.interpreter.PresentationLayer.PresentationLayer;
-import com.ul.ims.apdu.interpreter.SessionLayer.ClientSessionLayer;
-import com.ul.ims.apdu.interpreter.SessionLayer.ServerSessionLayer;
-import com.ul.ims.apdu.interpreter.SessionLayer.SessionLayer;
+import com.ul.ims.apdu.interpreter.presentationLayer.ApduProtocolPresentationLayer;
+import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayer;
+import com.ul.ims.apdu.interpreter.sessionLayer.ClientSessionLayer;
+import com.ul.ims.apdu.interpreter.sessionLayer.ServerSessionLayer;
+import com.ul.ims.apdu.interpreter.sessionLayer.SessionLayer;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
 import org.junit.Before;
 

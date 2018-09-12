@@ -1,4 +1,4 @@
-package com.ul.ims.apdu.interpreter.PresentationLayer;
+package com.ul.ims.apdu.interpreter.presentationLayer;
 
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.encoding.types.ApduFile;

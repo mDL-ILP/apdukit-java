@@ -1,4 +1,4 @@
-package com.ul.ims.apdu.interpreter.SessionLayer;
+package com.ul.ims.apdu.interpreter.sessionLayer;
 
 import com.onehilltech.promises.Promise;
 import com.ul.ims.apdu.encoding.CommandApdu;

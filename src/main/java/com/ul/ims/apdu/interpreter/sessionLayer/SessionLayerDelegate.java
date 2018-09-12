@@ -1,4 +1,4 @@
-package com.ul.ims.apdu.interpreter.SessionLayer;
+package com.ul.ims.apdu.interpreter.sessionLayer;
 
 import com.ul.ims.apdu.encoding.ReadBinaryCommand;
 import com.ul.ims.apdu.encoding.ResponseApdu;
