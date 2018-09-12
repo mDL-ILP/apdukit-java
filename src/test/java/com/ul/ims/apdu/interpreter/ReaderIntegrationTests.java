@@ -6,6 +6,7 @@ import com.ul.ims.apdu.encoding.SelectCommand;
 import com.ul.ims.apdu.encoding.enums.FileControlInfo;
 import com.ul.ims.apdu.encoding.enums.StatusCode;
 import com.ul.ims.apdu.apps.ExampleApp;
+import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.interpreter.exceptions.OutOfSequenceException;
 import com.ul.ims.apdu.interpreter.exceptions.ResponseApduStatusCodeError;
@@ -118,7 +119,7 @@ public class ReaderIntegrationTests extends IntegrationTests {
     }
 
     @Test(expected = ParseException.class)
-    public void testInvalidOnReceive() throws Throwable {
+    public void testInvalidOnReceiveWithOpenRequest() throws Throwable {
         //Mock transport layer so it doesn't actually write.
         this.readerTransportLayer = mock(TransportLayerSimulator.class);
         setupSessionLayers();
@@ -137,6 +138,21 @@ public class ReaderIntegrationTests extends IntegrationTests {
         //Verify that the error was reported all the way back to the application
         verify(this.reader, timeout(100).times(1)).onReceiveInvalidApdu(isA(ParseException.class));
         p.getValue();//This will throw the expected exception. Because 0, 0, 1 isn't a valid response apdu.
+    }
+
+    @Test(expected = ParseException.class)
+    public void testInvalidOnReceiveWithoutARequest() throws Throwable {
+        //Mock transport layer so it doesn't actually write.
+        this.readerTransportLayer = mock(TransportLayerSimulator.class);
+        setupSessionLayers();
+        this.reader = mock(TestReader.class);
+        readerPresentationLayer.setDelegate(this.reader);
+
+        //Then call the onReceive function with an invalid apdu.
+        readerSessionLayer.onReceive(new byte[]{0, 0, 1});
+
+        //Verify that the error was reported all the way back to the application
+        verify(this.reader, timeout(100).times(1)).onReceiveInvalidApdu(isA(InvalidApduException.class));
     }
 
     @Test

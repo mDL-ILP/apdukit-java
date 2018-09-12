@@ -13,14 +13,14 @@ import java.util.concurrent.Semaphore;
 /**
  * The client session layer handles sending and receiving APDU messages. It also allows for sending APDU commands and keeping track of this open request. Then fulfilling the promise upon receiving data.
  */
-public class ClientSessionLayer implements SessionLayer {
+public class ReaderSessionLayer implements SessionLayer {
     private TransportLayer transportLayer;
     private SessionLayerDelegate delegate;
 
     private Semaphore openRequestLock = new Semaphore(1);
     private Promise.Settlement<ResponseApdu> openRequest = null;
 
-    public ClientSessionLayer(TransportLayer transportLayer) {
+    public ReaderSessionLayer(TransportLayer transportLayer) {
         this.transportLayer = transportLayer;
         this.transportLayer.setDelegate(this);
     }

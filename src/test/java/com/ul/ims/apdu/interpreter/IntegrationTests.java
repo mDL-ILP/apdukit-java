@@ -4,8 +4,8 @@ import com.ul.ims.apdu.interpreter.Mocks.TestHolder;
 import com.ul.ims.apdu.interpreter.Mocks.TestReader;
 import com.ul.ims.apdu.interpreter.presentationLayer.ApduProtocolPresentationLayer;
 import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayer;
-import com.ul.ims.apdu.interpreter.sessionLayer.ClientSessionLayer;
-import com.ul.ims.apdu.interpreter.sessionLayer.ServerSessionLayer;
+import com.ul.ims.apdu.interpreter.sessionLayer.ReaderSessionLayer;
+import com.ul.ims.apdu.interpreter.sessionLayer.HolderSessionLayer;
 import com.ul.ims.apdu.interpreter.sessionLayer.SessionLayer;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
 import org.junit.Before;
@@ -35,8 +35,8 @@ public class IntegrationTests {
     }
 
     public void setupSessionLayers() {
-        holderSessionLayer = new ServerSessionLayer(holderTransportLayer);
-        readerSessionLayer = new ClientSessionLayer(readerTransportLayer);
+        holderSessionLayer = new HolderSessionLayer(holderTransportLayer);
+        readerSessionLayer = new ReaderSessionLayer(readerTransportLayer);
         setupPresentationLayers();
     }
 
