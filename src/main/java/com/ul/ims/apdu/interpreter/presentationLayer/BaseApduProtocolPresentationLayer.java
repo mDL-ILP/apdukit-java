@@ -26,7 +26,6 @@ abstract class BaseApduProtocolPresentationLayer implements PresentationLayer {
 
     public BaseApduProtocolPresentationLayer(SessionLayer sessionLayer) {
         this.sessionLayer = sessionLayer;
-        this.sessionLayer.setDelegate(this);
     }
 
     /**
@@ -132,15 +131,5 @@ abstract class BaseApduProtocolPresentationLayer implements PresentationLayer {
     @Override
     public void setDelegate(PresentationLayerDelegate delegate) {
         this.delegate = delegate;
-    }
-
-    @Override
-    public void onSendFailure(Exception exception) {
-        this.delegate.onSendFailure(exception);
-    }
-
-    @Override
-    public void onReceiveInvalidApdu(ParseException exception) {
-        this.delegate.onReceiveInvalidApdu(exception);
     }
 }

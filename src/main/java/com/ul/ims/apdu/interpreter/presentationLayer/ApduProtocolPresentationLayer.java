@@ -6,71 +6,72 @@ import com.ul.ims.apdu.encoding.ResponseApdu;
 import com.ul.ims.apdu.encoding.SelectCommand;
 import com.ul.ims.apdu.encoding.enums.FileType;
 import com.ul.ims.apdu.encoding.enums.StatusCode;
+import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.encoding.types.ApduFile;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 import com.ul.ims.apdu.encoding.types.FileID;
 import com.ul.ims.apdu.interpreter.sessionLayer.SessionLayer;
+import com.ul.ims.apdu.interpreter.sessionLayer.SessionLayerDelegate;
 
 import java.util.Arrays;
 
 /**
  *  The handle apdu protocol presentation layer. Extends the base apdu protocol layer with methods to know of to handle requests
  */
-public class ApduProtocolPresentationLayer extends BaseApduProtocolPresentationLayer {
+public class ApduProtocolPresentationLayer extends BaseApduProtocolPresentationLayer  implements SessionLayerDelegate {
 
     public ApduProtocolPresentationLayer(SessionLayer sessionLayer) {
         super(sessionLayer);
+        this.sessionLayer.setDelegate(this);
     }
 
     @Override
     public ResponseApdu receivedSelectCommand(SelectCommand command) {
         FileType type = command.getFileType();
-        StatusCode result = StatusCode.ERROR_UNKNOWN;
         FileID requestedFileId = command.getFileID();
+        boolean success = false;
         switch (type) {
             case DF:
-                result = setSelectedApp((DedicatedFileID) requestedFileId) ? StatusCode.SUCCESSFUL_PROCESSING : StatusCode.ERROR_FILE_NOT_FOUND;
+                success = setSelectedDF((DedicatedFileID) requestedFileId);
                 break;
             case EF:
-                result = setSelectedEF((ElementaryFileID) requestedFileId) ? StatusCode.SUCCESSFUL_PROCESSING : StatusCode.ERROR_FILE_NOT_FOUND;
+                success = setSelectedEF((ElementaryFileID) requestedFileId);
                 break;
         }
-        return new ResponseApdu().setStatusCode(result);
+        return new ResponseApdu().setStatusCode(success ? StatusCode.SUCCESSFUL_PROCESSING : StatusCode.ERROR_FILE_NOT_FOUND);
     }
 
     @Override
     public ResponseApdu receivedReadCommand(ReadBinaryCommand command) {
-        ResponseApdu response = new ResponseApdu().setStatusCode(StatusCode.ERROR_UNKNOWN);
-
         ElementaryFileID id = this.selectedEF;
         if (command instanceof ReadBinaryShortFileIDCommand) {
             id = ((ReadBinaryShortFileIDCommand) command).getElementaryFileID();
         }
-        if (id == null) {
-            response.setStatusCode(StatusCode.ERROR_COMMAND_NOT_ALLOWED);
-            return response;
-        }
+        StatusCode fileIDPermissionState = null;
         //Check if file exists
         ApduFile file = this.delegate.getLocalFile(id);
         if (file == null) {
-            response.setStatusCode(StatusCode.ERROR_FILE_NOT_FOUND);
-            return response;
+            fileIDPermissionState = StatusCode.ERROR_FILE_NOT_FOUND;
         }
         //Check access
         if (delegate != null && !delegate.isFileAllowed(id)) {
-            response.setStatusCode(StatusCode.ERROR_SECURITY_STATUS_NOT_SATISFIED);
-            return response;
+            fileIDPermissionState = StatusCode.ERROR_SECURITY_STATUS_NOT_SATISFIED;
+        }
+        if(fileIDPermissionState != null) {
+            return new ResponseApdu().setStatusCode(StatusCode.ERROR_UNKNOWN).setStatusCode(fileIDPermissionState);
         }
         this.selectedEF = id;//On read we also set the selectEF. For the case of a ReadBinaryShortFileIDCommand where we don't select before read.
+        return buildResponseOnRead(file, command.getOffset(), command.getMaximumExpectedLength());
+    }
 
-        Short readBeginIndex = command.getOffset();
-        Short maxResponseSize = (short) command.getMaximumExpectedLength();
+    private ResponseApdu buildResponseOnRead(ApduFile file, short offset, int maximumExpectedLength) {
+        ResponseApdu response =  new ResponseApdu();
+
         byte[] data = file.getData();
-
         //Calculate readEndIndex and cap it to the length of the data.
         //EndOffset is the index of how far we'll read.
-        int readEndIndex = readBeginIndex + maxResponseSize;
+        int readEndIndex = offset + maximumExpectedLength;
         boolean askedForToomuch = false;
         if (readEndIndex > data.length) {
             readEndIndex = data.length;
@@ -78,12 +79,12 @@ public class ApduProtocolPresentationLayer extends BaseApduProtocolPresentationL
         }
 
         //If the given readBeginIndex is too high or there is nothing to send back.
-        if (readBeginIndex >= readEndIndex) {
+        if (offset >= readEndIndex) {
             response.setStatusCode(StatusCode.ERROR_COMMAND_NOT_ALLOWED);
             return response;
         }
         response.setStatusCode(askedForToomuch ? StatusCode.WARNING_END_OF_FILE : StatusCode.SUCCESSFUL_PROCESSING);
-        response.setData(Arrays.copyOfRange(data, readBeginIndex, readEndIndex));
+        response.setData(Arrays.copyOfRange(data, offset, readEndIndex));
         return response;
     }
 
@@ -93,7 +94,7 @@ public class ApduProtocolPresentationLayer extends BaseApduProtocolPresentationL
      * @param id dedicatedFileID specifying the app id
      * @return boolean indicating if the set was successful.
      */
-    private boolean setSelectedApp(DedicatedFileID id) {
+    private boolean setSelectedDF(DedicatedFileID id) {
         if (id == null || !id.equals(this.delegate.getAppId())) {
             return false;
         }
@@ -117,5 +118,17 @@ public class ApduProtocolPresentationLayer extends BaseApduProtocolPresentationL
         }
         this.selectedEF = id;
         return true;
+    }
+
+    /// Informs the delegate when got an exception when sending has failed.
+    @Override
+    public void onSendFailure(Exception exception) {
+        this.delegate.onSendFailure(exception);
+    }
+
+    /// Informs the delegate when we've received an invalid apdu
+    @Override
+    public void onReceiveInvalidApdu(ParseException exception) {
+        this.delegate.onReceiveInvalidApdu(exception);
     }
 }
