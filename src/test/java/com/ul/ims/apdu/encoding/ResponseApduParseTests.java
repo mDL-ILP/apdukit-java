@@ -5,12 +5,9 @@ import com.ul.ims.apdu.encoding.enums.StatusCode;
 import org.junit.Test;
 
 import com.ul.ims.apdu.extensions.ByteArrayInputStreamExtension;
-
-import javax.xml.ws.Response;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 
 public class ResponseApduParseTests {

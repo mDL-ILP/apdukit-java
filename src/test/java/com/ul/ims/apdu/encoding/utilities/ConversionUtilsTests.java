@@ -4,7 +4,7 @@ import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 
 public class ConversionUtilsTests {
