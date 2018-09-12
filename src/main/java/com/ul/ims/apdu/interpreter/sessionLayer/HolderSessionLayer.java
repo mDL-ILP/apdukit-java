@@ -59,4 +59,9 @@ public class HolderSessionLayer implements SessionLayer {
         }
         sendResponse(response);
     }
+
+    @Override
+    public void onEvent(String string, int i) {
+
+    }
 }
