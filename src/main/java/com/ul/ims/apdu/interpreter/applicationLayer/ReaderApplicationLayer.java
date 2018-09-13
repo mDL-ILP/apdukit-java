@@ -1,67 +1,63 @@
 package com.ul.ims.apdu.interpreter.applicationLayer;
 
 import com.onehilltech.promises.Promise;
-import com.ul.ims.apdu.encoding.exceptions.InvalidApduFileException;
 import com.ul.ims.apdu.encoding.types.ApduFile;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayer;
+import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayerDelegate;
 
 import java.util.concurrent.Semaphore;
 
 /**
  * Is a type of application that reads files of that other application it is connected to.
  */
-public abstract class ReaderApplicationLayer extends ApplicationLayer {
+public abstract class ReaderApplicationLayer implements ApplicationLayer, PresentationLayerDelegate {
+    private DedicatedFileID appId;
+    private PresentationLayer presentationLayer;
     //A lock so that we only get one file at a time.
     private Semaphore getFileLock = new Semaphore(1);
 
     public ReaderApplicationLayer(PresentationLayer presentationLayer, DedicatedFileID appId) {
-        super(presentationLayer, appId);
+        this.appId = appId;
+        this.presentationLayer = presentationLayer;
+        this.presentationLayer.setDelegate(this);
     }
 
     /**
      * Gets an elementary file. Hangs if there is already an open request.
      *
-     * @param elementaryFileID
+     * @param id
      * @return
      */
-    public Promise<byte[]> getFile(ElementaryFileID elementaryFileID) {
+    public Promise<byte[]> readFile(ElementaryFileID id) {
         try {
             getFileLock.acquire();
         } catch (InterruptedException e) {
             return Promise.reject(e);
         }
         return this.presentationLayer.selectDF(this.appId).then((res) -> {
-            return this.readEF(elementaryFileID);
+            return openApduFile(id).then((file) -> this.resolveApduFile(file));
         }).always(() -> {
             getFileLock.release();
         });
     }
 
     /**
-     * Routes call to right EF read. If short it'll use the short id otherwise it'll use the normal.
-     * @param fileID
-     * @return
-     */
-    public Promise<byte[]> readEF(ElementaryFileID fileID) {
-        return openApduFile(fileID).then((file) -> this.resolveApduFile(file));
-    }
-
-    /**
      * Creates the intial first part of a APDU file by selecting the ElementaryFileID on at the holder and read a few initial bytes.
-     * @param fileID
-     * @return
+     * This is done to know how large the file is. As all APDU files are TLV (tag, length, value). We'll know what to expect size wise.
+     * Then the resolveApduFile method can download any remaining bytes left.
+     * @param fileID the ElementaryFileID that needs to be opened.
+     * @return Promise of a ApduFile
      */
     private Promise<ApduFile> openApduFile(ElementaryFileID fileID) {
-        Promise<byte[]> promise;
-        //If short file id is available, a read will also instantly select the file.
+        Promise<byte[]> firstChunk;
         if (fileID.isShortIDAvailable()) {
-            promise = this.presentationLayer.readBinary(fileID, (byte)0);
+            firstChunk = this.presentationLayer.readBinary(fileID, (byte)0);//If short file id is available, a read will also instantly select the file.
         } else {
-            promise = this.presentationLayer.selectEF(fileID).then((v) -> this.presentationLayer.readBinary((byte)0));//Select and read the first part.
+            firstChunk = this.presentationLayer.selectEF(fileID).then((v) -> this.presentationLayer.readBinary((byte)0));//Select and read the first part.
         }
-        return promise.then((data) -> {
+        return firstChunk.then((data) -> {
             try {
                 ApduFile result = new ApduFile(data);
                 return Promise.resolve(result);
@@ -77,9 +73,6 @@ public abstract class ReaderApplicationLayer extends ApplicationLayer {
      * @return
      */
     private Promise<byte[]> resolveApduFile(ApduFile file) {
-        if (file == null) {
-            return Promise.reject(new InvalidApduFileException("File is null"));
-        }
         return new Promise<>(settlement -> {
             while (!file.isComplete()) {
                 short offset = file.getCurrentSize();
@@ -105,5 +98,14 @@ public abstract class ReaderApplicationLayer extends ApplicationLayer {
     @Override
     public boolean isFileAllowed(ElementaryFileID file) {
         return false;
+    }
+
+    @Override
+    public DedicatedFileID getAppId() {
+        return this.appId;
+    }
+
+    public void setAppId(DedicatedFileID id) {
+        this.appId = id;
     }
 }

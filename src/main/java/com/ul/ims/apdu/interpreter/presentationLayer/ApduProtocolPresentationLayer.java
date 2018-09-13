@@ -42,50 +42,54 @@ public class ApduProtocolPresentationLayer extends BaseApduProtocolPresentationL
         return new ResponseApdu().setStatusCode(success ? StatusCode.SUCCESSFUL_PROCESSING : StatusCode.ERROR_FILE_NOT_FOUND);
     }
 
+    public StatusCode checkPermissionForFile(ElementaryFileID id) {
+        ApduFile file = this.delegate.getLocalFile(id);
+        if (file == null) {
+            return StatusCode.ERROR_FILE_NOT_FOUND;
+        }
+        //Check access
+        if (delegate != null && !delegate.isFileAllowed(id)) {
+            return StatusCode.ERROR_SECURITY_STATUS_NOT_SATISFIED;
+        }
+        return null;
+    }
+
     @Override
     public ResponseApdu receivedReadCommand(ReadBinaryCommand command) {
         ElementaryFileID id = this.selectedEF;
         if (command instanceof ReadBinaryShortFileIDCommand) {
             id = ((ReadBinaryShortFileIDCommand) command).getElementaryFileID();
+            this.selectedEF = id;
         }
-        StatusCode fileIDPermissionState = null;
-        //Check if file exists
         ApduFile file = this.delegate.getLocalFile(id);
         if (file == null) {
-            fileIDPermissionState = StatusCode.ERROR_FILE_NOT_FOUND;
+            return new ResponseApdu().setStatusCode(StatusCode.ERROR_FILE_NOT_FOUND);
         }
-        //Check access
-        if (delegate != null && !delegate.isFileAllowed(id)) {
-            fileIDPermissionState = StatusCode.ERROR_SECURITY_STATUS_NOT_SATISFIED;
+        if (delegate == null || !delegate.isFileAllowed(id)) {
+            return new ResponseApdu().setStatusCode(StatusCode.ERROR_SECURITY_STATUS_NOT_SATISFIED);
         }
-        if(fileIDPermissionState != null) {
-            return new ResponseApdu().setStatusCode(StatusCode.ERROR_UNKNOWN).setStatusCode(fileIDPermissionState);
-        }
-        this.selectedEF = id;//On read we also set the selectEF. For the case of a ReadBinaryShortFileIDCommand where we don't select before read.
         return buildResponseOnRead(file, command.getOffset(), command.getMaximumExpectedLength());
     }
 
     private ResponseApdu buildResponseOnRead(ApduFile file, short offset, int maximumExpectedLength) {
-        ResponseApdu response =  new ResponseApdu();
-
         byte[] data = file.getData();
-        //Calculate readEndIndex and cap it to the length of the data.
-        //EndOffset is the index of how far we'll read.
-        int readEndIndex = offset + maximumExpectedLength;
-        boolean askedForToomuch = false;
-        if (readEndIndex > data.length) {
+        int readStartIndex = offset;
+        int readEndIndex = offset + maximumExpectedLength;//EndOffset is the index of how far we'll read.
+        boolean askedForToomuch = readEndIndex > data.length;
+        if(readStartIndex > data.length) {
+            readStartIndex = (short) data.length;
+        }
+        if (askedForToomuch) {//Cap it to the length of the data.
             readEndIndex = data.length;
-            askedForToomuch = true;
         }
-
-        //If the given readBeginIndex is too high or there is nothing to send back.
-        if (offset >= readEndIndex) {
-            response.setStatusCode(StatusCode.ERROR_COMMAND_NOT_ALLOWED);
-            return response;
+        //If the given offset is too high or there is nothing to send back.
+        if (readStartIndex >= readEndIndex) {
+            return new ResponseApdu().setStatusCode(StatusCode.ERROR_COMMAND_NOT_ALLOWED);
         }
-        response.setStatusCode(askedForToomuch ? StatusCode.WARNING_END_OF_FILE : StatusCode.SUCCESSFUL_PROCESSING);
-        response.setData(Arrays.copyOfRange(data, offset, readEndIndex));
-        return response;
+        byte[] payload = Arrays.copyOfRange(data, readStartIndex, readEndIndex);
+        return new ResponseApdu()
+            .setStatusCode(askedForToomuch ? StatusCode.WARNING_END_OF_FILE : StatusCode.SUCCESSFUL_PROCESSING)
+            .setData(payload);
     }
 
     /**

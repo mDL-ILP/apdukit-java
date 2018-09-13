@@ -41,12 +41,10 @@ public class ApduFile {
 
     public void appendValue(byte[] value) throws IOException {
         if(value.length > remainingBytes()) {
-            //Throw over complete.
             throw new IOException("Actual data exceeds expected data");
         }
         this.data.write(value);
     }
-
 
     public boolean isComplete() {
         return getCurrentSize() >= getDeclaredSize();
