@@ -11,7 +11,7 @@ import java.io.IOException;
 public class ReadBinaryShortFileIDCommand extends ReadBinaryCommand {
 
     private ElementaryFileID elementaryFileID;
-    private byte offset;
+    private Byte offset;
 
     public ReadBinaryShortFileIDCommand() {super();}
 
@@ -44,6 +44,9 @@ public class ReadBinaryShortFileIDCommand extends ReadBinaryCommand {
         super.validate();
         if(elementaryFileID == null) {
             throw new ValueNotSetException("elementaryFileID");
+        }
+        if(offset == null) {
+            throw new ValueNotSetException("offset");
         }
     }
 

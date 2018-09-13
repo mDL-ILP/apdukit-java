@@ -1,4 +1,4 @@
-package com.ul.ims.apdu.interpreter.Mocks;
+package com.ul.ims.apdu.interpreter;
 
 import com.ul.ims.apdu.apps.ExampleApp;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;

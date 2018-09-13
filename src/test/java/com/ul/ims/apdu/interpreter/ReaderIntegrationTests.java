@@ -10,7 +10,6 @@ import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.interpreter.exceptions.OutOfSequenceException;
 import com.ul.ims.apdu.interpreter.exceptions.ResponseApduStatusCodeError;
-import com.ul.ims.apdu.interpreter.Mocks.TestReader;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,8 +26,7 @@ public class ReaderIntegrationTests extends IntegrationTests {
     @Test(expected = IOException.class)
     public void testDisconnected() throws Throwable {
         readerTransportLayer.close();
-        CommandApdu message = new SelectCommand().setFileID(ExampleApp.instance.ValidDF_NormalLength2).setFileControlInfo(FileControlInfo.NOFCIReturn);
-        Promise p = this.readerSessionLayer.send(message);
+        Promise p = this.reader.readFile(ExampleApp.instance.ValidEF_NoShortId);
         Assert.assertNull(p.getValue(1000));
     }
 
