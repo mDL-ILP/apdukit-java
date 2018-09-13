@@ -27,7 +27,6 @@ public class ReaderIntegrationTests extends IntegrationTests {
     @Test(expected = IOException.class)
     public void testDisconnected() throws Throwable {
         readerTransportLayer.close();
-        this.reader.
         CommandApdu message = new SelectCommand().setFileID(ExampleApp.instance.ValidDF_NormalLength2).setFileControlInfo(FileControlInfo.NOFCIReturn);
         Promise p = this.readerSessionLayer.send(message);
         Assert.assertNull(p.getValue(1000));
