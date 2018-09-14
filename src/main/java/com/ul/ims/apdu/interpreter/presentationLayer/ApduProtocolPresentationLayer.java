@@ -135,4 +135,9 @@ public class ApduProtocolPresentationLayer extends BaseApduProtocolPresentationL
     public void onReceiveInvalidApdu(ParseException exception) {
         this.delegate.onReceiveInvalidApdu(exception);
     }
+
+    @Override
+    public void onEvent(String string, int i) {
+        this.delegate.onEvent(string, i);
+    }
 }

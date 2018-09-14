@@ -19,4 +19,15 @@ public class TestReader extends ReaderApplicationLayer {
     public void onReceiveInvalidApdu(ParseException exception) {
         exception.printStackTrace();
     }
+
+    /**
+     * Informs the delegate upon receiving an event
+     *
+     * @param string
+     * @param i
+     */
+    @Override
+    public void onEvent(String string, int i) {
+
+    }
 }

@@ -85,6 +85,6 @@ public class ReaderSessionLayer implements SessionLayer {
 
     @Override
     public void onEvent(String string, int i) {
-
+        this.delegate.onEvent(string, i);
     }
 }

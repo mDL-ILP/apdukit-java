@@ -38,4 +38,9 @@ public interface PresentationLayerDelegate {
      * @param exception
      */
     void onReceiveInvalidApdu(ParseException exception);
+
+    /**
+     * Informs the delegate upon receiving an event
+     */
+    void onEvent(String string, int i);
 }
