@@ -55,14 +55,14 @@ public class ApduFile {
     }
 
     private void computeDeclaredSize() throws InvalidApduFileException {
-        this.declaredSize = (short) (this.info.getLength() + this.info.getDataOffset());
+        this.declaredSize = (short) ((this.info.getLength() + this.info.getDataOffset()) & 0xff);
         if(this.declaredSize <= 0) {
             throw new InvalidApduFileException("Total size is 0");
         }
     }
 
     public short getDeclaredSize() {
-        return declaredSize;
+        return (short) (declaredSize & 0xff);
     }
 
     public short getCurrentSize() {
@@ -79,6 +79,7 @@ public class ApduFile {
 
     /*
     TODO: Make a layer check if the response is actually what it asked for.
+    Also validate response status code.
 
     public void validateResponseDataTag(byte[] data, byte expectedTag) throws InvalidResponseTagException {
         if (data == null) {

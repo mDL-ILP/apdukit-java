@@ -11,6 +11,7 @@ import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.interpreter.exceptions.OutOfSequenceException;
 import com.ul.ims.apdu.interpreter.exceptions.ResponseApduStatusCodeError;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.junit.Assert;
 import org.junit.Test;
 import java.io.IOException;
@@ -90,7 +91,7 @@ public class ReaderIntegrationTests extends IntegrationTests {
 
     @Test
     public void testGetLargeFileUsingShortId() throws Throwable {
-        byte[] expected = ExampleApp.instance.DatagroupE;
+        byte[] expected = ExampleApp.instance.LargeFile;
         assertTrue("Can't set file", holder.setLocalFile(ExampleApp.instance.ValidEF2, expected));
         Promise p = reader.readFile(ExampleApp.instance.ValidEF2);
         Assert.assertArrayEquals(expected, (byte[])p.getValue(100000));
@@ -98,7 +99,23 @@ public class ReaderIntegrationTests extends IntegrationTests {
 
     @Test
     public void testGetLargeFileUsingNormalId() throws Throwable {
-        byte[] expected = ExampleApp.instance.DatagroupE;//
+        byte[] expected = ExampleApp.instance.LargeFile;//
+        assertTrue("Can't set file", holder.setLocalFile(ExampleApp.instance.ValidNormalIdEF, expected));
+        Promise p = reader.readFile(ExampleApp.instance.ValidNormalIdEF);
+        Assert.assertArrayEquals("Expected equal our concatenated result", expected, (byte[])p.getValue(100000));
+    }
+
+    @Test
+    public void testGetFileUsingShortId() throws Throwable {
+        byte[] expected = ExampleApp.instance.DatagroupE;
+        assertTrue("Can't set file", holder.setLocalFile(ExampleApp.instance.ValidNormalIdEF, expected));
+        Promise p = reader.readFile(ExampleApp.instance.ValidNormalIdEF);
+        Assert.assertArrayEquals("Expected equal our concatenated result", expected, (byte[])p.getValue(100000));
+    }
+
+    @Test
+    public void testGetFileUsingNormalId() throws Throwable {
+        byte[] expected = ExampleApp.instance.DatagroupE;
         assertTrue("Can't set file", holder.setLocalFile(ExampleApp.instance.ValidNormalIdEF, expected));
         Promise p = reader.readFile(ExampleApp.instance.ValidNormalIdEF);
         Assert.assertArrayEquals("Expected equal our concatenated result", expected, (byte[])p.getValue(100000));
