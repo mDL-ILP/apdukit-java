@@ -25,9 +25,9 @@ public class ConversionUtils {
         ByteBuffer wrapped = ByteBuffer.wrap(value);
         switch (value.length) {
             case 1:
-                return value[0];
+                return (short) (value[0] & 0xff);// bitmask to convert to an unsigned int
             case 2:
-                return wrapped.getShort();
+                return (short)  (wrapped.getShort() & 0xffff);// bitmask to convert to an unsigned short
         }
         throw new InvalidNumericException("Couldn't convert byte to short");
     }

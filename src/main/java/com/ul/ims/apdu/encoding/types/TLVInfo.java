@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public class TLVInfo {
     /// Tag
-    int tag;
+    byte tag;
     /// Length of the TLV structure
     short length;
     /// At what offset the actual data (value) starts
@@ -24,7 +24,7 @@ public class TLVInfo {
             throw new ParseException("Not enough bytes to parse TLV structure");
         }
         int dataOffset = Constants.BYTE_OFFSET_TILL_LENGTH;
-        int tag = data[0];
+        byte tag = data[0];
         byte[] lengthBytes = new byte[] {data[1]};
 
         //Check if the length value is exceeds 255
@@ -36,7 +36,7 @@ public class TLVInfo {
             int lengthValueSize = ConversionUtils.bitsToByte(bits);
             int lengthEndOffset = Constants.BYTE_OFFSET_TILL_LENGTH + lengthValueSize;
             if(data.length < lengthEndOffset) {
-                throw new ParseException("Invalid TLV structure. Length doesn't make any sense");
+                throw new ParseException("Invalid TLV structure. Length invalid");
             }
             lengthBytes = Arrays.copyOfRange(data, Constants.BYTE_OFFSET_TILL_LENGTH, lengthEndOffset);
             dataOffset = lengthEndOffset;
@@ -47,7 +47,7 @@ public class TLVInfo {
         this.dataOffset = dataOffset;
     }
 
-    public int getTag() {
+    public byte getTag() {
         return tag;
     }
 

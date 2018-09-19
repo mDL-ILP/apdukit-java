@@ -79,6 +79,7 @@ public class ApduFile {
 
     /*
     TODO: Make a layer check if the response is actually what it asked for.
+    Also validate response status code.
 
     public void validateResponseDataTag(byte[] data, byte expectedTag) throws InvalidResponseTagException {
         if (data == null) {
