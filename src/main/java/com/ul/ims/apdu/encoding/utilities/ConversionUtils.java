@@ -25,7 +25,7 @@ public class ConversionUtils {
         ByteBuffer wrapped = ByteBuffer.wrap(value);
         switch (value.length) {
             case 1:
-                return value[0];
+                return (short) (value[0] & 0xff);
             case 2:
                 return wrapped.getShort();
         }

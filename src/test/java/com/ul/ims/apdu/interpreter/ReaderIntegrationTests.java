@@ -108,8 +108,8 @@ public class ReaderIntegrationTests extends IntegrationTests {
     @Test
     public void testGetFileUsingShortId() throws Throwable {
         byte[] expected = ExampleApp.instance.DatagroupE;
-        assertTrue("Can't set file", holder.setLocalFile(ExampleApp.instance.ValidNormalIdEF, expected));
-        Promise p = reader.readFile(ExampleApp.instance.ValidNormalIdEF);
+        assertTrue("Can't set file", holder.setLocalFile(ExampleApp.instance.ValidShortIdEF1, expected));
+        Promise p = reader.readFile(ExampleApp.instance.ValidShortIdEF1);
         Assert.assertArrayEquals("Expected equal our concatenated result", expected, (byte[])p.getValue(100000));
     }
 
