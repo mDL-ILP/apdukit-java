@@ -55,14 +55,14 @@ public class ApduFile {
     }
 
     private void computeDeclaredSize() throws InvalidApduFileException {
-        this.declaredSize = (short) ((this.info.getLength() + this.info.getDataOffset()) & 0xffff);// bitmask to convert to an unsigned short
+        this.declaredSize = (short) ((this.info.getLength() + this.info.getDataOffset()));
         if(this.declaredSize <= 0) {
             throw new InvalidApduFileException("Total size is 0");
         }
     }
 
     public short getDeclaredSize() {
-        return (short) (declaredSize & 0xffff);// bitmask to convert to an unsigned short
+        return (declaredSize);
     }
 
     public short getCurrentSize() {
