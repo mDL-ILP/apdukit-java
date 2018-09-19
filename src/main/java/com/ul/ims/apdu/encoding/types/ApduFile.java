@@ -55,14 +55,14 @@ public class ApduFile {
     }
 
     private void computeDeclaredSize() throws InvalidApduFileException {
-        this.declaredSize = (short) ((this.info.getLength() + this.info.getDataOffset()));
+        this.declaredSize = (short) (this.info.getLength() + this.info.getDataOffset());
         if(this.declaredSize <= 0) {
             throw new InvalidApduFileException("Total size is 0");
         }
     }
 
     public short getDeclaredSize() {
-        return (declaredSize);
+        return declaredSize;
     }
 
     public short getCurrentSize() {
