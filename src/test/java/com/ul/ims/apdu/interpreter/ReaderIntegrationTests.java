@@ -11,7 +11,6 @@ import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.interpreter.exceptions.OutOfSequenceException;
 import com.ul.ims.apdu.interpreter.exceptions.ResponseApduStatusCodeError;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.junit.Assert;
 import org.junit.Test;
 import java.io.IOException;
