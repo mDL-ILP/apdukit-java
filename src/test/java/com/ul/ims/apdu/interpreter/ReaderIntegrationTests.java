@@ -10,7 +10,6 @@ import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.interpreter.exceptions.OutOfSequenceException;
 import com.ul.ims.apdu.interpreter.exceptions.ResponseApduStatusCodeError;
-import com.ul.ims.apdu.interpreter.Mocks.TestReader;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,8 +26,7 @@ public class ReaderIntegrationTests extends IntegrationTests {
     @Test(expected = IOException.class)
     public void testDisconnected() throws Throwable {
         readerTransportLayer.close();
-        CommandApdu message = new SelectCommand().setFileID(ExampleApp.instance.ValidDF_NormalLength2).setFileControlInfo(FileControlInfo.NOFCIReturn);
-        Promise p = this.readerSessionLayer.send(message);
+        Promise p = this.reader.readFile(ExampleApp.instance.ValidEF_NoShortId);
         Assert.assertNull(p.getValue(1000));
     }
 
@@ -36,7 +34,7 @@ public class ReaderIntegrationTests extends IntegrationTests {
     public void testWrongApplication() throws Throwable {
         //Change app id
         this.holder.setAppId(ExampleApp.instance.ValidDF_NormalLength2);
-        Promise p = reader.getFile(ExampleApp.instance.ValidShortIdEF1);
+        Promise p = reader.readFile(ExampleApp.instance.ValidShortIdEF1);
         try {
             Assert.assertNull(p.getValue());
         }catch(ResponseApduStatusCodeError e) {
@@ -50,7 +48,7 @@ public class ReaderIntegrationTests extends IntegrationTests {
         //Set the file on the holder side.
         assertTrue("Holder could not set file", holder.setLocalFile(ExampleApp.instance.ValidShortIdEF1, fileData));
 
-        Promise p = reader.getFile(ExampleApp.instance.ValidShortIdEF1);
+        Promise p = reader.readFile(ExampleApp.instance.ValidShortIdEF1);
         Assert.assertArrayEquals(fileData, (byte[])p.getValue(1000));
     }
 
@@ -58,13 +56,13 @@ public class ReaderIntegrationTests extends IntegrationTests {
     public void testGetFileWithNormalId() throws Throwable {
         byte[] fileData = new byte[]{01, 02, 05, 06};
         assertTrue("Can't set file", holder.setLocalFile(ExampleApp.instance.ValidNormalIdEF, fileData));
-        Promise p = reader.getFile(ExampleApp.instance.ValidNormalIdEF);
+        Promise p = reader.readFile(ExampleApp.instance.ValidNormalIdEF);
         Assert.assertArrayEquals(fileData, (byte[])p.getValue(100000));
     }
 
     @Test
     public void testGetFileUsingShortIdDoesNotExist() throws Throwable {
-        Promise p = reader.getFile(ExampleApp.instance.ValidShortIdEF1).then((res) -> {
+        Promise p = reader.readFile(ExampleApp.instance.ValidShortIdEF1).then((res) -> {
             Assert.fail("File not set. Therefore, promise must fail.");
             return null;
         });
@@ -78,7 +76,7 @@ public class ReaderIntegrationTests extends IntegrationTests {
 
     @Test
     public void testGetFileUsingNormalIdDoesNotExist() throws Throwable {
-        Promise p = reader.getFile(ExampleApp.instance.ValidNormalIdEF).then((res) -> {
+        Promise p = reader.readFile(ExampleApp.instance.ValidNormalIdEF).then((res) -> {
             Assert.fail("File not set. Therefore, promise must fail.");
             return null;
         });
@@ -94,7 +92,7 @@ public class ReaderIntegrationTests extends IntegrationTests {
     public void testGetLargeFileUsingShortId() throws Throwable {
         byte[] expected = ExampleApp.instance.DatagroupE;
         assertTrue("Can't set file", holder.setLocalFile(ExampleApp.instance.ValidEF2, expected));
-        Promise p = reader.getFile(ExampleApp.instance.ValidEF2);
+        Promise p = reader.readFile(ExampleApp.instance.ValidEF2);
         Assert.assertArrayEquals(expected, (byte[])p.getValue(100000));
     }
 
@@ -102,7 +100,7 @@ public class ReaderIntegrationTests extends IntegrationTests {
     public void testGetLargeFileUsingNormalId() throws Throwable {
         byte[] expected = ExampleApp.instance.DatagroupE;//
         assertTrue("Can't set file", holder.setLocalFile(ExampleApp.instance.ValidNormalIdEF, expected));
-        Promise p = reader.getFile(ExampleApp.instance.ValidNormalIdEF);
+        Promise p = reader.readFile(ExampleApp.instance.ValidNormalIdEF);
         Assert.assertArrayEquals("Expected equal our concatenated result", expected, (byte[])p.getValue(100000));
     }
 
@@ -163,7 +161,7 @@ public class ReaderIntegrationTests extends IntegrationTests {
 
         //One thread asking for a file
         Thread thread = new Thread(() -> {
-            Promise p = reader.getFile(ExampleApp.instance.ValidShortIdEF1);
+            Promise p = reader.readFile(ExampleApp.instance.ValidShortIdEF1);
             try {
                 Assert.assertArrayEquals(expected, (byte[])p.getValue(1000));
             } catch (Throwable throwable) {
@@ -173,7 +171,7 @@ public class ReaderIntegrationTests extends IntegrationTests {
         thread.start();
 
         //Main thread asking for a file
-        Promise p = reader.getFile(ExampleApp.instance.ValidShortIdEF1);
+        Promise p = reader.readFile(ExampleApp.instance.ValidShortIdEF1);
 
         Assert.assertArrayEquals(expected, (byte[])p.getValue(1000));
         thread.join();

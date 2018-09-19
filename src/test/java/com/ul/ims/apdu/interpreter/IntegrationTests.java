@@ -1,7 +1,5 @@
 package com.ul.ims.apdu.interpreter;
 
-import com.ul.ims.apdu.interpreter.Mocks.TestHolder;
-import com.ul.ims.apdu.interpreter.Mocks.TestReader;
 import com.ul.ims.apdu.interpreter.presentationLayer.ApduProtocolPresentationLayer;
 import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayer;
 import com.ul.ims.apdu.interpreter.sessionLayer.ReaderSessionLayer;

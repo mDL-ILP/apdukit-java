@@ -1,52 +1,27 @@
-package com.ul.ims.apdu.encoding.utilities;
+package com.ul.ims.apdu.encoding.types;
 
 import com.ul.ims.apdu.encoding.Constants;
-import com.ul.ims.apdu.encoding.exceptions.InvalidNumericException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 
-import com.ul.ims.apdu.extensions.ByteArrayInputStreamExtension;
-import java.io.IOException;
-import java.io.PushbackInputStream;
+import com.ul.ims.apdu.encoding.utilities.ConversionUtils;
 import java.util.Arrays;
 
-//All the APDU cheat codes on planet earth.
-public class ApduUtils {
-    public static class TLVInfo {
-        //Tag
-        int tag;
-        //Length of the TLV structure
-        short length;
-        //At what offset the actual data (value) starts
-        int dataOffset;
-
-        private TLVInfo(int tag, short length, int dataOffset) {
-            this.tag = tag;
-            this.length = length;
-            this.dataOffset = dataOffset;
-        }
-
-        public int getTag() {
-            return tag;
-        }
-
-        public short getLength() {
-            return length;
-        }
-
-        public int getDataOffset() {
-            return dataOffset;
-        }
-
-    }
+public class TLVInfo {
+    /// Tag
+    int tag;
+    /// Length of the TLV structure
+    short length;
+    /// At what offset the actual data (value) starts
+    int dataOffset;
 
     /**
      * Parses a TLV structure and returns the tag, length and dataOffset
      * @param data TLV data
      * @return TLVInfo containing TLV information
      */
-    public static TLVInfo parseTLV(byte[] data) {
+    public TLVInfo(byte[] data) throws ParseException {
         if(data == null || data.length < Constants.BYTE_OFFSET_TILL_LENGTH) {
-            return null;
+            throw new ParseException("Not enough bytes to parse TLV structure");
         }
         int dataOffset = Constants.BYTE_OFFSET_TILL_LENGTH;
         int tag = data[0];
@@ -61,15 +36,27 @@ public class ApduUtils {
             int lengthValueSize = ConversionUtils.bitsToByte(bits);
             int lengthEndOffset = Constants.BYTE_OFFSET_TILL_LENGTH + lengthValueSize;
             if(data.length < lengthEndOffset) {
-                return null;
+                throw new ParseException("Invalid TLV structure. Length doesn't make any sense");
             }
             lengthBytes = Arrays.copyOfRange(data, Constants.BYTE_OFFSET_TILL_LENGTH, lengthEndOffset);
             dataOffset = lengthEndOffset;
         }
-        try {
-            short length = ConversionUtils.fromBytesToShort(lengthBytes);
-            return new TLVInfo(tag, length, dataOffset);
-        } catch (Exception ignored) {}
-        return null;
+        short length = ConversionUtils.fromBytesToShort(lengthBytes);
+        this.tag = tag;
+        this.length = length;
+        this.dataOffset = dataOffset;
     }
+
+    public int getTag() {
+        return tag;
+    }
+
+    public short getLength() {
+        return length;
+    }
+
+    public int getDataOffset() {
+        return dataOffset;
+    }
+
 }

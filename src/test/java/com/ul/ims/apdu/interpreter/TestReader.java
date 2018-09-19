@@ -1,4 +1,4 @@
-package com.ul.ims.apdu.interpreter.Mocks;
+package com.ul.ims.apdu.interpreter;
 
 import com.ul.ims.apdu.apps.ExampleApp;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
@@ -18,5 +18,16 @@ public class TestReader extends ReaderApplicationLayer {
     @Override
     public void onReceiveInvalidApdu(ParseException exception) {
         exception.printStackTrace();
+    }
+
+    /**
+     * Informs the delegate upon receiving an event
+     *
+     * @param string
+     * @param i
+     */
+    @Override
+    public void onEvent(String string, int i) {
+
     }
 }

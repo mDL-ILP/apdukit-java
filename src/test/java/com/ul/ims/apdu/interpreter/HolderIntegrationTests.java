@@ -1,7 +1,6 @@
 package com.ul.ims.apdu.interpreter;
 
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
-import com.ul.ims.apdu.interpreter.Mocks.TestHolder;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
 import org.junit.Test;
 

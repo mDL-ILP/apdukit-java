@@ -61,6 +61,8 @@ public class ReadBinaryShortFileIDCommandBuildTests {
     public void testValidation() throws Exception {
         callValidationCheck("elementaryFileID");
         subject.setElementaryFileID(ExampleApp.instance.ValidShortIdEF1);
+        callValidationCheck("offset");
+        subject.setOffset((byte) 0);
         subject.validate();
     }
 
