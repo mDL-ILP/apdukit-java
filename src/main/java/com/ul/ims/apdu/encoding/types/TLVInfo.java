@@ -10,7 +10,7 @@ public class TLVInfo {
     /// Tag
     byte tag;
     /// Length of the TLV structure
-    int length;
+    short length;
     /// At what offset the actual data (value) starts
     int dataOffset;
 
@@ -51,7 +51,7 @@ public class TLVInfo {
         return tag;
     }
 
-    public int getLength() {
+    public short getLength() {
         return length;
     }
 
