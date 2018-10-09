@@ -11,7 +11,7 @@ import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 import com.ul.ims.apdu.encoding.enums.InstructionCode;
 import com.ul.ims.apdu.encoding.enums.FileControlInfo;
-import com.ul.ims.apdu.encoding.enums.SelectFileType;
+import com.ul.ims.apdu.encoding.enums.FileType;
 import com.ul.ims.apdu.encoding.exceptions.InvalidApduException;
 import com.ul.ims.apdu.encoding.exceptions.ValueNotSetException;
 import com.ul.ims.apdu.encoding.types.FileID;
@@ -19,7 +19,7 @@ import com.ul.ims.apdu.encoding.utilities.ApduLengthUtils;
 import com.ul.ims.apdu.extensions.OutOfBytesException;
 
 public class SelectCommand extends CommandApdu {
-    private SelectFileType fileType;
+    private FileType fileType;
     private FileControlInfo fileControlInfo;
     private FileID fileID;
 
@@ -27,40 +27,12 @@ public class SelectCommand extends CommandApdu {
         super(InstructionCode.SELECT);
     }
 
-    public SelectCommand(ByteArrayInputStreamExtension stream) throws Exception {
+    public SelectCommand(ByteArrayInputStreamExtension stream) throws ParseException {
         super(stream);
-        this.fileType = SelectFileType.valueOf(stream.readByte());
+        this.fileType = FileType.valueOf(stream.readByte());
         this.fileControlInfo = FileControlInfo.valueOf(stream.readByte());
         this.decodeFileId(stream);
         validate();
-    }
-
-    public SelectCommand setFileControlInfo(FileControlInfo expectedResult) {
-        this.fileControlInfo = expectedResult;
-        return this;
-    }
-
-    public SelectCommand setFileID(FileID id) {
-        this.fileID = id;
-        if(this.fileID instanceof ElementaryFileID) {
-            this.fileType = SelectFileType.EF;
-        }
-        if(this.fileID instanceof DedicatedFileID) {
-            this.fileType = SelectFileType.DF;
-        }
-        return this;
-    }
-
-    public SelectFileType getFileType() {
-        return fileType;
-    }
-
-    public FileControlInfo getFileControlInfo() {
-        return fileControlInfo;
-    }
-
-    public FileID getFileID() {
-        return fileID;
     }
 
     @Override
@@ -76,10 +48,10 @@ public class SelectCommand extends CommandApdu {
             throw new ValueNotSetException("fileType");
         }
         //Check that the filetype is correct.
-        if(fileType == SelectFileType.EF && !(fileID instanceof ElementaryFileID) ) {
+        if(fileType == FileType.EF && !(fileID instanceof ElementaryFileID) ) {
             throw new InvalidApduException("filetype does not match file id instance type");
         }
-        if(fileType == SelectFileType.DF && !(fileID instanceof DedicatedFileID) ) {
+        if(fileType == FileType.DF && !(fileID instanceof DedicatedFileID) ) {
             throw new InvalidApduException("filetype does not match file id instance type");
         }
         if(fileControlInfo == null) {
@@ -127,4 +99,33 @@ public class SelectCommand extends CommandApdu {
         return stream;
     }
 
+
+   //Getters and setters
+   public SelectCommand setFileControlInfo(FileControlInfo fileControlInfo) {
+       this.fileControlInfo = fileControlInfo;
+       return this;
+   }
+
+    public SelectCommand setFileID(FileID id) {
+        this.fileID = id;
+        if(this.fileID instanceof ElementaryFileID) {
+            this.fileType = FileType.EF;
+        }
+        if(this.fileID instanceof DedicatedFileID) {
+            this.fileType = FileType.DF;
+        }
+        return this;
+    }
+
+    public FileType getFileType() {
+        return fileType;
+    }
+
+    public FileControlInfo getFileControlInfo() {
+        return fileControlInfo;
+    }
+
+    public FileID getFileID() {
+        return fileID;
+    }
 }

@@ -7,6 +7,10 @@ This aims to help developers build, parse and interpret APDU. An application pro
 
 This can be used in the context of mobile devices or smart cards.
 
+## Mobile Driving License Interoperability Learning Platform
+
+This project is apart of the mobile Driving License Interoperability Learning Platform. Please see the [main repository](https://github.com/mDL-ILP/mDL-ILP) for more information.
+
 ## Installation
 
 ### Gradle
@@ -19,7 +23,7 @@ buildscript {
 
 dependencies {
   # for JVM-only projects
-  implement com.ul-ts.apdukit:apdukit:x.y.z
+  implement com.github.mDL-ILP:apdukit-java:x.y.z
 }
 ```
 

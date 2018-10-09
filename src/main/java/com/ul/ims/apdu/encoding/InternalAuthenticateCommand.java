@@ -22,21 +22,13 @@ public class InternalAuthenticateCommand extends CommandApdu {
         super(InstructionCode.INTERNAL_AUTHENTICATE);
     }
 
-    public InternalAuthenticateCommand(ByteArrayInputStreamExtension stream) throws Exception {
+    public InternalAuthenticateCommand(ByteArrayInputStreamExtension stream) throws ParseException {
         super(stream);
         this.algorithmInfo = stream.readByte();
         this.referenceDataQualifier = stream.readByte();
         this.decodeChallenge(stream);
         this.decodeMaxExpectedLength(stream);
         validate();
-    }
-
-    private void decodeMaxExpectedLength(ByteArrayInputStreamExtension stream) throws ParseException {
-        try {
-            this.maxExpectedLength = ApduLengthUtils.decodeMaxExpectedLength(stream);
-        } catch (InvalidNumericException e) {
-            throw new ParseException(e.getMessage());
-        }
     }
 
     //Called when reading, parsing
@@ -49,11 +41,33 @@ public class InternalAuthenticateCommand extends CommandApdu {
         }
     }
 
+    //Called when writing, encoding
+    private void encodeChallenge(ByteArrayOutputStream stream) throws IOException {
+        byte[] challengeLength = ApduLengthUtils.encodeDataLength((short) challenge.length);
+        stream.write(challengeLength);//Length
+        stream.write(this.challenge);//Data
+    }
+
+    private void decodeMaxExpectedLength(ByteArrayInputStreamExtension stream) throws ParseException {
+        try {
+            this.maxExpectedLength = ApduLengthUtils.decodeMaxExpectedLength(stream);
+        } catch (InvalidNumericException e) {
+            throw new ParseException(e.getMessage());
+        }
+    }
+
+    private void encodeMaxExpectedLength(ByteArrayOutputStream stream) throws IOException, InvalidNumericException {
+        stream.write(ApduLengthUtils.encodeMaxExpectedLength(this.maxExpectedLength));
+    }
+
     @Override
     public void validate() throws InvalidApduException {
         super.validate();
         if (instructionCode != InstructionCode.INTERNAL_AUTHENTICATE) {
             throw new InvalidApduException("Instruction code is not INTERNAL_AUTHENTICATE");
+        }
+        if (challenge == null || challenge.length != Constants.DEFAULT_CHALLENGE_LENGTH) {
+            throw new InvalidApduException("Invalid challenge");
         }
         if (algorithmInfo == null) {
             throw new ValueNotSetException("algorithmInfo");
@@ -70,25 +84,11 @@ public class InternalAuthenticateCommand extends CommandApdu {
         stream.write(this.algorithmInfo); //P1
         stream.write(this.referenceDataQualifier);//P2
         encodeChallenge(stream);
-        this.encodeMaxExpectedLength(stream);
+        encodeMaxExpectedLength(stream);
         return stream;
     }
 
-    private void encodeMaxExpectedLength(ByteArrayOutputStream stream) throws IOException, InvalidNumericException {
-        stream.write(ApduLengthUtils.encodeMaxExpectedLength(this.maxExpectedLength));
-    }
-
-    //Called when writing, encoding
-    private void encodeChallenge(ByteArrayOutputStream stream) throws InvalidApduException, IOException {
-        byte[] challenge = this.challenge;
-        if (challenge == null || challenge.length != Constants.DEFAULT_CHALLENGE_LENGTH) {
-            throw new InvalidApduException("Invalid challenge");
-        }
-        byte[] challengeLength = ApduLengthUtils.encodeDataLength((short) challenge.length);
-        stream.write(challengeLength);//Length
-        stream.write(challenge);//Data
-    }
-
+    //Getters and setters
     public byte getAlgorithmInfo() {
         return algorithmInfo;
     }

@@ -30,7 +30,7 @@ public class ReadBinaryShortFileIDCommandParseTests {
         assertTrue(command instanceof ReadBinaryShortFileIDCommand);
         ReadBinaryShortFileIDCommand result = (ReadBinaryShortFileIDCommand) command;
 
-        assertEquals(ExampleApp.instance.ValidEF1.getShortIdentifier(),result.getElementaryFileID().getShortIdentifier());
+        assertEquals(ExampleApp.instance.ValidShortIdEF1.getShortIdentifier(),result.getElementaryFileID().getShortIdentifier());
         assertEquals(40, result.getOffset());
         assertEquals(259,result.getMaximumExpectedLength());
     }

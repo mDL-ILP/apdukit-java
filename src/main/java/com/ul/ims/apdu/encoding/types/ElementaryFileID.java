@@ -34,14 +34,17 @@ public class ElementaryFileID implements FileID {
         return normalIdentifier;
     }
 
-    public short getShortIDValueAsAShort() throws InvalidNumericException {
+    public Short getShortIDValueAsAShort() throws InvalidNumericException {
         if(!this.isShortIDAvailable()) {
             throw new InvalidNumericException("The short id is not available");
         }
         return ConversionUtils.fromBytesToShort(new byte[]{this.shortIdentifier});
     }
 
-    public short getNormalIDValueAsAShort() throws InvalidNumericException {
+    public Short getNormalIDValueAsAShort() throws InvalidNumericException {
+        if(this.normalIdentifier == null) {
+            throw new InvalidNumericException("The normal id is not available");
+        }
         return ConversionUtils.fromBytesToShort(this.normalIdentifier);
     }
 

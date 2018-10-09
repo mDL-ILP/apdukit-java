@@ -16,10 +16,10 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
     //For simple async
-    compile 'com.github.iain17.promises:promises-jvm:0.7.2'
+    implementation 'com.github.mDL-ILP.promises:promises-android:0.7.2'
     //For mocking
-    testCompile 'org.mockito:mockito-core:2.7.22'
+    testImplementation 'org.mockito:mockito-core:2.7.22'
     //For waiter
-    testCompile 'net.jodah:concurrentunit:0.4.3'
+    testImplementation 'net.jodah:concurrentunit:0.4.3'
 
 }

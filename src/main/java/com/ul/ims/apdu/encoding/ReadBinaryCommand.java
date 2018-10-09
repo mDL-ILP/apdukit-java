@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public abstract class ReadBinaryCommand extends CommandApdu {
 
-    int maximumExpectedLength = Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED;//Default is to use DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED.
+    int maximumExpectedLength = Constants.DEFAULT_MAX_EXPECTED_LENGTH_EXTENDED;
 
     ReadBinaryCommand() {
         super(InstructionCode.READ_BINARY);
@@ -22,14 +22,6 @@ public abstract class ReadBinaryCommand extends CommandApdu {
 
     ReadBinaryCommand(ByteArrayInputStreamExtension stream) throws ParseException {
         super(stream);
-    }
-
-    @Override
-    public void validate() throws InvalidApduException {
-        super.validate();
-        if(instructionCode != InstructionCode.READ_BINARY) {
-            throw new InvalidApduException("InstructionCode is not READ_BINARY");
-        }
     }
 
     protected void decodeMaxExpectedLength(ByteArrayInputStreamExtension stream) throws ParseException {
@@ -44,7 +36,18 @@ public abstract class ReadBinaryCommand extends CommandApdu {
         stream.write(ApduLengthUtils.encodeMaxExpectedLength(this.maximumExpectedLength));
     }
 
-    static ReadBinaryCommand fromBytes(ByteArrayInputStreamExtension stream) throws Exception {
+    @Override
+    public void validate() throws InvalidApduException {
+        super.validate();
+        if(instructionCode != InstructionCode.READ_BINARY) {
+            throw new InvalidApduException("InstructionCode is not READ_BINARY");
+        }
+    }
+
+    /**
+     * Apdu from bytes. Routes and initializes the right read binary subclass depending on the file id bits.
+     */
+    static ReadBinaryCommand fromBytes(ByteArrayInputStreamExtension stream) throws ParseException {
         stream.skip(2);//Skip the instruction class + instruction code
         byte fileIdFirstByte = stream.readByte();
         stream.reset();
@@ -54,8 +57,9 @@ public abstract class ReadBinaryCommand extends CommandApdu {
         return new ReadBinaryOffsetCommand(stream);
     }
 
-    public void setMaximumExpectedLength(int size) {
+    public ReadBinaryCommand setMaximumExpectedLength(int size) {
         this.maximumExpectedLength = size;
+        return this;
     }
 
     public int getMaximumExpectedLength() {
