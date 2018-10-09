@@ -12,8 +12,6 @@ import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 import com.ul.ims.apdu.encoding.types.FileID;
 import com.ul.ims.apdu.interpreter.sessionLayer.HolderSessionLayer;
-import com.ul.ims.apdu.interpreter.sessionLayer.HolderSessionLayerDelegate;
-import com.ul.ims.apdu.interpreter.sessionLayer.SessionLayer;
 
 import java.util.Arrays;
 
@@ -21,13 +19,14 @@ import java.util.Arrays;
  *  The handle apdu protocol presentation layer. Extends the base apdu protocol layer with methods to know of to handle requests
  */
 public class HolderPresentation implements HolderPresentationLayer {
-    private PresentationLayerDelegate delegate;
+    private HolderPresentationLayerDelegate delegate;
     private HolderSessionLayer sessionLayer;
     private ElementaryFileID selectedEF;
     private DedicatedFileID selectedDF;
 
     public HolderPresentation(HolderSessionLayer sessionLayer) {
         this.sessionLayer = sessionLayer;
+        this.sessionLayer.setDelegate(this);
     }
 
     @Override
@@ -147,6 +146,6 @@ public class HolderPresentation implements HolderPresentationLayer {
 
     @Override
     public void setDelegate(PresentationLayerDelegate delegate) {
-        this.delegate = delegate;
+        this.delegate = (HolderPresentationLayerDelegate) delegate;
     }
 }

@@ -1,5 +1,7 @@
 package com.ul.ims.apdu.interpreter.applicationLayer;
 
-interface ApplicationLayer  {
+import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayerDelegate;
+
+interface ApplicationLayer extends PresentationLayerDelegate {
 
 }

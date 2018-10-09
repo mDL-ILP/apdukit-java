@@ -27,6 +27,7 @@ public class ReaderPresentation implements ReaderPresentationLayer {
 
     public ReaderPresentation(ReaderSessionLayer sessionLayer) {
         this.sessionLayer = sessionLayer;
+        this.sessionLayer.setDelegate(this);
     }
 
     /**
@@ -34,6 +35,7 @@ public class ReaderPresentation implements ReaderPresentationLayer {
      * @param fileID
      * @return
      */
+    @Override
     public Promise selectDF(DedicatedFileID fileID) {
         if(selectedDF == fileID) {
             return Promise.resolve(null);
