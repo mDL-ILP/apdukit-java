@@ -7,7 +7,6 @@ import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 import com.ul.ims.apdu.interpreter.presentationLayer.HolderPresentationLayer;
 import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayer;
-import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayerDelegate;
 
 import java.util.HashMap;
 

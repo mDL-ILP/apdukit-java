@@ -16,7 +16,7 @@ import com.ul.ims.apdu.interpreter.sessionLayer.HolderSessionLayer;
 import java.util.Arrays;
 
 /**
- *  The handle apdu protocol presentation layer. Extends the base apdu protocol layer with methods to know of to handle requests
+ *  The holder's presentation layer. Implements methods to handle supported APDU commands from the reader.
  */
 public class HolderPresentation implements HolderPresentationLayer {
     private HolderPresentationLayerDelegate delegate;

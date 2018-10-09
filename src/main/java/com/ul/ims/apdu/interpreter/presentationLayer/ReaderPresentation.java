@@ -4,25 +4,22 @@ import com.onehilltech.promises.Promise;
 import com.ul.ims.apdu.encoding.*;
 import com.ul.ims.apdu.encoding.enums.FileControlInfo;
 import com.ul.ims.apdu.encoding.enums.StatusCode;
-import com.ul.ims.apdu.encoding.exceptions.InvalidApduFileException;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
-import com.ul.ims.apdu.encoding.types.ApduFile;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 import com.ul.ims.apdu.interpreter.exceptions.ResponseApduStatusCodeError;
 import com.ul.ims.apdu.interpreter.sessionLayer.ReaderSessionLayer;
-import com.ul.ims.apdu.interpreter.sessionLayer.SessionLayer;
 
 /**
- * The base APDU protocol presentation layer. It keeps state of what DF and EF are selected. Exposes methods to select DF or EF.
+ * The reader's presentation layer. It keeps state of what DF and EF are selected. Exposes methods to select DF or EF.
  */
 public class ReaderPresentation implements ReaderPresentationLayer {
     protected ReaderPresentationLayerDelegate delegate;
     protected ReaderSessionLayer sessionLayer;
 
     //State
-    protected DedicatedFileID selectedDF;
-    protected ElementaryFileID selectedEF;
+    private DedicatedFileID selectedDF;
+    private ElementaryFileID selectedEF;
     private int maxExpLength = Constants.DEFAULT_MAX_EXPECTED_LENGTH_NOT_EXTENDED;
 
     public ReaderPresentation(ReaderSessionLayer sessionLayer) {

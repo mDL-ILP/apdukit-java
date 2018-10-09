@@ -5,7 +5,6 @@ import com.ul.ims.apdu.encoding.types.ApduFile;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayer;
-import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayerDelegate;
 import com.ul.ims.apdu.interpreter.presentationLayer.ReaderPresentationLayer;
 
 import java.util.concurrent.Semaphore;

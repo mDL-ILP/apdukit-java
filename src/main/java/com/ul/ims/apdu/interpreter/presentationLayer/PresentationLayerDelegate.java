@@ -1,9 +1,6 @@
 package com.ul.ims.apdu.interpreter.presentationLayer;
 
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
-import com.ul.ims.apdu.encoding.types.ApduFile;
-import com.ul.ims.apdu.encoding.types.DedicatedFileID;
-import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 
 public interface PresentationLayerDelegate {
     /**

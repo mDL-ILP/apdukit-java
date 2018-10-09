@@ -7,7 +7,7 @@ import com.ul.ims.apdu.interpreter.applicationLayer.HolderApplication;
 import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayer;
 
 public class TestHolder extends HolderApplication {
-    public TestHolder(PresentationLayer presentationLayer) {
+    TestHolder(PresentationLayer presentationLayer) {
         super(presentationLayer, ExampleApp.instance.ValidDF_NormalLength1);
     }
 

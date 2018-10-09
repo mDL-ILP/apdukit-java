@@ -11,8 +11,8 @@ import com.ul.ims.apdu.interpreter.transportlayer.TransportLayer;
 import java.util.concurrent.Semaphore;
 
 /**
- * The client session layer handles sending and receiving APDU messages. It also allows for sending APDU commands
- * and keeping track of this open request. Then fulfilling the promise upon receiving data.
+ * The reader session layer handles sending and receiving APDU messages. It also allows for sending APDU commands,
+ * keeping track of the corresponding open requests, and then fulfilling the promise upon receiving data.
  */
 public class ReaderSession implements ReaderSessionLayer {
     private TransportLayer transportLayer;

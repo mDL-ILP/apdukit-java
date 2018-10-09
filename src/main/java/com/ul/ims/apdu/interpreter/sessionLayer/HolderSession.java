@@ -1,6 +1,5 @@
 package com.ul.ims.apdu.interpreter.sessionLayer;
 
-import com.onehilltech.promises.Promise;
 import com.ul.ims.apdu.encoding.CommandApdu;
 import com.ul.ims.apdu.encoding.ReadBinaryCommand;
 import com.ul.ims.apdu.encoding.ResponseApdu;
@@ -10,7 +9,8 @@ import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayer;
 
 /**
- * The server session layer handles sending and receiving apdu messages. It decodes incoming bytes into Apdu objects and then calls the appropriate delegate message handle method.
+ * The holder session layer handles sending and receiving APDU messages. It decodes incoming bytes into Apdu objects
+ * and then calls the appropriate delegate message handle method.
  */
 public class HolderSession implements HolderSessionLayer {
     private TransportLayer transportLayer;
