@@ -2,8 +2,8 @@ package com.ul.ims.apdu.interpreter;
 
 import com.ul.ims.apdu.interpreter.presentationLayer.ApduProtocolPresentationLayer;
 import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayer;
-import com.ul.ims.apdu.interpreter.sessionLayer.ReaderSessionLayer;
-import com.ul.ims.apdu.interpreter.sessionLayer.HolderSessionLayer;
+import com.ul.ims.apdu.interpreter.sessionLayer.ReaderSession;
+import com.ul.ims.apdu.interpreter.sessionLayer.HolderSession;
 import com.ul.ims.apdu.interpreter.sessionLayer.SessionLayer;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
 import org.junit.Before;
@@ -33,8 +33,8 @@ public class IntegrationTests {
     }
 
     public void setupSessionLayers() {
-        holderSessionLayer = new HolderSessionLayer(holderTransportLayer);
-        readerSessionLayer = new ReaderSessionLayer(readerTransportLayer);
+        holderSessionLayer = new HolderSession(holderTransportLayer);
+        readerSessionLayer = new ReaderSession(readerTransportLayer);
         setupPresentationLayers();
     }
 

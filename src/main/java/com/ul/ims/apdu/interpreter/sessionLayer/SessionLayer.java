@@ -10,6 +10,5 @@ import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerDelegate;
  * It also allows for sending apdu commands and keeping track of this open request. Then fufilling the promise upon receiving data.
  */
 public interface SessionLayer extends TransportLayerDelegate {
-    Promise<ResponseApdu> send(CommandApdu command);
     void setDelegate(SessionLayerDelegate delegate);
 }

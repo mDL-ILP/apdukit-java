@@ -11,6 +11,7 @@ import com.ul.ims.apdu.encoding.types.ApduFile;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 import com.ul.ims.apdu.encoding.types.FileID;
+import com.ul.ims.apdu.interpreter.sessionLayer.HolderSessionLayerDelegate;
 import com.ul.ims.apdu.interpreter.sessionLayer.SessionLayer;
 import com.ul.ims.apdu.interpreter.sessionLayer.SessionLayerDelegate;
 
@@ -19,7 +20,7 @@ import java.util.Arrays;
 /**
  *  The handle apdu protocol presentation layer. Extends the base apdu protocol layer with methods to know of to handle requests
  */
-public class ApduProtocolPresentationLayer extends BaseApduProtocolPresentationLayer  implements SessionLayerDelegate {
+public class ApduProtocolPresentationLayer extends BaseApduProtocolPresentationLayer  implements HolderSessionLayerDelegate {
 
     public ApduProtocolPresentationLayer(SessionLayer sessionLayer) {
         super(sessionLayer);
