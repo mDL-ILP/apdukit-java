@@ -123,8 +123,8 @@ public class ReaderIntegrationTests extends IntegrationTests {
     @Test(expected = OutOfSequenceException.class)
     public void testOutOfSequence() throws Throwable {
         CommandApdu message = new SelectCommand().setFileID(ExampleApp.instance.ValidDF_NormalLength2).setFileControlInfo(FileControlInfo.NOFCIReturn);
-        readerSessionLayer.send(message);//Double send. Out of sequence!!
-        Promise p2 = readerSessionLayer.send(message).then(e -> {//Double send. Out of sequence!!
+        readerSession.send(message);//Double send. Out of sequence!!
+        Promise p2 = readerSession.send(message).then(e -> {//Double send. Out of sequence!!
             Assert.fail("You cannot send two messages while we have one open request standing");
             return null;
         });
@@ -138,17 +138,17 @@ public class ReaderIntegrationTests extends IntegrationTests {
         this.readerTransportLayer = mock(TransportLayerSimulator.class);
         setupSessionLayers();
         this.reader = mock(TestReader.class);
-        readerPresentationLayer.setDelegate(this.reader);
+        readerPresentation.setDelegate(this.reader);
 
         //Do a select command.
         CommandApdu message = new SelectCommand().setFileID(ExampleApp.instance.ValidDF_NormalLength2).setFileControlInfo(FileControlInfo.NOFCIReturn);
-        Promise p = readerSessionLayer.send(message).then(e -> {
+        Promise p = readerSession.send(message).then(e -> {
             Assert.fail("Invalid response must not resolve promise.");
             return null;
         });
         Thread.sleep(100);
         //Then call the onReceive function with an invalid apdu.
-        readerSessionLayer.onReceive(new byte[]{0, 0, 1});
+        readerSession.onReceive(new byte[]{0, 0, 1});
 
         //Verify that the error was reported all the way back to the application
         verify(this.reader, timeout(100).times(1)).onReceiveInvalidApdu(isA(ParseException.class));
@@ -161,10 +161,10 @@ public class ReaderIntegrationTests extends IntegrationTests {
         this.readerTransportLayer = mock(TransportLayerSimulator.class);
         setupSessionLayers();
         this.reader = mock(TestReader.class);
-        readerPresentationLayer.setDelegate(this.reader);
+        readerPresentation.setDelegate(this.reader);
 
         //Then call the onReceive function with an invalid apdu.
-        readerSessionLayer.onReceive(new byte[]{0, 0, 1});
+        readerSession.onReceive(new byte[]{0, 0, 1});
 
         //Verify that the error was reported all the way back to the application
         verify(this.reader, timeout(100).times(1)).onReceiveInvalidApdu(isA(InvalidApduException.class));

@@ -16,7 +16,7 @@ import java.util.concurrent.Semaphore;
  */
 public class ReaderSession implements ReaderSessionLayer {
     private TransportLayer transportLayer;
-    private SessionLayerDelegate delegate;
+    private ReaderSessionLayerDelegate delegate;
 
     private Semaphore openRequestLock = new Semaphore(1, true);
     private Promise.Settlement<ResponseApdu> openRequest = null;
@@ -65,7 +65,7 @@ public class ReaderSession implements ReaderSessionLayer {
 
     @Override
     public void setDelegate(SessionLayerDelegate delegate) {
-        this.delegate = delegate;
+        this.delegate = (ReaderSessionLayerDelegate) delegate;
     }
 
     @Override

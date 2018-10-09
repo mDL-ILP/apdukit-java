@@ -1,20 +1,17 @@
 package com.ul.ims.apdu.interpreter;
 
-import com.ul.ims.apdu.interpreter.presentationLayer.ApduProtocolPresentationLayer;
-import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayer;
-import com.ul.ims.apdu.interpreter.sessionLayer.ReaderSession;
-import com.ul.ims.apdu.interpreter.sessionLayer.HolderSession;
-import com.ul.ims.apdu.interpreter.sessionLayer.SessionLayer;
+import com.ul.ims.apdu.interpreter.presentationLayer.*;
+import com.ul.ims.apdu.interpreter.sessionLayer.*;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
 import org.junit.Before;
 
 public class IntegrationTests {
     public TransportLayerSimulator holderTransportLayer;
     public TransportLayerSimulator readerTransportLayer;
-    public SessionLayer holderSessionLayer;
-    public SessionLayer readerSessionLayer;
-    public PresentationLayer holderPresentationLayer;
-    public PresentationLayer readerPresentationLayer;
+    public HolderSessionLayer holderSession;
+    public ReaderSessionLayer readerSession;
+    public HolderPresentationLayer holderPresentation;
+    public ReaderPresentationLayer readerPresentation;
 
     public TestHolder holder;
     public TestReader reader;
@@ -33,19 +30,19 @@ public class IntegrationTests {
     }
 
     public void setupSessionLayers() {
-        holderSessionLayer = new HolderSession(holderTransportLayer);
-        readerSessionLayer = new ReaderSession(readerTransportLayer);
+        holderSession = new HolderSession(holderTransportLayer);
+        readerSession = new ReaderSession(readerTransportLayer);
         setupPresentationLayers();
     }
 
     public void setupPresentationLayers() {
-        holderPresentationLayer = new ApduProtocolPresentationLayer(holderSessionLayer);
-        readerPresentationLayer = new ApduProtocolPresentationLayer(readerSessionLayer);
+        holderPresentation = new HolderPresentation(holderSession);
+        readerPresentation = new ReaderPresentation(readerSession);
         setupApplicationLayers();
     }
 
     public void setupApplicationLayers() {
-        this.holder = new TestHolder(holderPresentationLayer);
-        this.reader = new TestReader(readerPresentationLayer);
+        this.holder = new TestHolder(holderPresentation);
+        this.reader = new TestReader(readerPresentation);
     }
 }

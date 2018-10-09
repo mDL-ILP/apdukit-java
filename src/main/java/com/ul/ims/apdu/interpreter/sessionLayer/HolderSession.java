@@ -12,9 +12,9 @@ import com.ul.ims.apdu.interpreter.transportlayer.TransportLayer;
 /**
  * The server session layer handles sending and receiving apdu messages. It decodes incoming bytes into Apdu objects and then calls the appropriate delegate message handle method.
  */
-public class HolderSession implements SessionLayer {
+public class HolderSession implements HolderSessionLayer {
     private TransportLayer transportLayer;
-    private SessionLayerDelegate delegate;
+    private HolderSessionLayerDelegate delegate;
 
     public HolderSession(TransportLayer transportLayer) {
         this.transportLayer = transportLayer;
@@ -23,7 +23,7 @@ public class HolderSession implements SessionLayer {
 
     @Override
     public void setDelegate(SessionLayerDelegate delegate) {
-        this.delegate = (SessionLayerDelegate) delegate;
+        this.delegate = (HolderSessionLayerDelegate) delegate;
     }
 
     private void sendResponse(ResponseApdu response) {
