@@ -17,10 +17,10 @@ public class HolderIntegrationTests extends IntegrationTests {
         this.holderTransportLayer = mock(TransportLayerSimulator.class);
         setupSessionLayers();
         this.holder = mock(TestHolder.class);
-        holderPresentationLayer.setDelegate(this.holder);
+        holderPresentation.setDelegate(this.holder);
 
         //Then call the onReceive function with an invalid apdu.
-        holderSessionLayer.onReceive(new byte[]{0, 0, 1});
+        holderSession.onReceive(new byte[]{0, 0, 1});
 
         //Verify that the error was reported all the way back to the application
         verify(this.holder, timeout(100).times(1)).onReceiveInvalidApdu(isA(ParseException.class));

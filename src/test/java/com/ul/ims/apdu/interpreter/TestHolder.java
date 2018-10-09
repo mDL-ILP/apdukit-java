@@ -3,10 +3,10 @@ package com.ul.ims.apdu.interpreter;
 import com.ul.ims.apdu.apps.ExampleApp;
 import com.ul.ims.apdu.encoding.exceptions.ParseException;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
-import com.ul.ims.apdu.interpreter.applicationLayer.HolderApplicationLayer;
+import com.ul.ims.apdu.interpreter.applicationLayer.HolderApplication;
 import com.ul.ims.apdu.interpreter.presentationLayer.PresentationLayer;
 
-public class TestHolder extends HolderApplicationLayer {
+public class TestHolder extends HolderApplication {
     public TestHolder(PresentationLayer presentationLayer) {
         super(presentationLayer, ExampleApp.instance.ValidDF_NormalLength1);
     }

@@ -10,22 +10,24 @@ import com.ul.ims.apdu.encoding.types.ApduFile;
 import com.ul.ims.apdu.encoding.types.DedicatedFileID;
 import com.ul.ims.apdu.encoding.types.ElementaryFileID;
 import com.ul.ims.apdu.interpreter.exceptions.ResponseApduStatusCodeError;
+import com.ul.ims.apdu.interpreter.sessionLayer.ReaderSessionLayer;
 import com.ul.ims.apdu.interpreter.sessionLayer.SessionLayer;
 
 /**
  * The base APDU protocol presentation layer. It keeps state of what DF and EF are selected. Exposes methods to select DF or EF.
  */
-abstract class BaseApduProtocolPresentationLayer implements PresentationLayer {
-    protected PresentationLayerDelegate delegate;
-    protected SessionLayer sessionLayer;
+public class ReaderPresentation implements ReaderPresentationLayer {
+    protected ReaderPresentationLayerDelegate delegate;
+    protected ReaderSessionLayer sessionLayer;
 
     //State
     protected DedicatedFileID selectedDF;
     protected ElementaryFileID selectedEF;
     private int maxExpLength = Constants.DEFAULT_MAX_EXPECTED_LENGTH_NOT_EXTENDED;
 
-    public BaseApduProtocolPresentationLayer(SessionLayer sessionLayer) {
+    public ReaderPresentation(ReaderSessionLayer sessionLayer) {
         this.sessionLayer = sessionLayer;
+        this.sessionLayer.setDelegate(this);
     }
 
     /**
@@ -33,6 +35,7 @@ abstract class BaseApduProtocolPresentationLayer implements PresentationLayer {
      * @param fileID
      * @return
      */
+    @Override
     public Promise selectDF(DedicatedFileID fileID) {
         if(selectedDF == fileID) {
             return Promise.resolve(null);
@@ -130,6 +133,21 @@ abstract class BaseApduProtocolPresentationLayer implements PresentationLayer {
 
     @Override
     public void setDelegate(PresentationLayerDelegate delegate) {
-        this.delegate = delegate;
+        this.delegate = (ReaderPresentationLayerDelegate) delegate;
+    }
+
+    @Override
+    public void onSendFailure(Exception exception) {
+        this.delegate.onSendFailure(exception);
+    }
+
+    @Override
+    public void onReceiveInvalidApdu(ParseException exception) {
+        this.delegate.onReceiveInvalidApdu(exception);
+    }
+
+    @Override
+    public void onEvent(String string, int i) {
+        this.delegate.onEvent(string, i);
     }
 }
