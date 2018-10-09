@@ -1,4 +1,4 @@
-package com.ul.ims.apdu;
+package com.ul.ims.apdu.encoding;
 
 import com.ul.ims.apdu.apps.ExampleApp;
 import com.ul.ims.apdu.encoding.CommandApdu;
