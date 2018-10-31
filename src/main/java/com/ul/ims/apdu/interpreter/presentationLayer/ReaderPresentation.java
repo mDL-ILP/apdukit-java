@@ -98,7 +98,7 @@ public class ReaderPresentation implements ReaderPresentationLayer {
 
     /**
      * Reads the response APDU and returns a new promise that will be rejected if the status code is not SUCCESSFUL
-     * @param response
+     * @param response the responseApdu to an issued Select command
      * @return promise with the response
      */
     private Promise<ResponseApdu> readSelectResponse(ResponseApdu response) {

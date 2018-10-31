@@ -17,6 +17,8 @@ public abstract class ReaderApplication implements ReaderApplicationLayer {
     private ReaderPresentationLayer presentationLayer;
     //A lock so that we only get one file at a time.
     private Semaphore getFileLock = new Semaphore(1);
+    //A lock to ensure we ask for only one chunk of the file at a time.
+    private Semaphore chunkWaitingLock = new Semaphore(1);
 
     public ReaderApplication(PresentationLayer presentationLayer, DedicatedFileID appId) {
         this.appId = appId;
@@ -38,13 +40,11 @@ public abstract class ReaderApplication implements ReaderApplicationLayer {
         }
         return this.presentationLayer.selectDF(this.appId).then((res) -> {
             return openApduFile(id).then((file) -> this.resolveApduFile(file));
-        }).always(() -> {
-            getFileLock.release();
         });
     }
 
     /**
-     * Creates the intial first part of a APDU file by selecting the ElementaryFileID on at the holder and read a few initial bytes.
+     * Creates the initial part of a APDU file by selecting the ElementaryFileID on at the holder and read a few initial bytes.
      * This is done to know how large the file is. As all APDU files are TLV (tag, length, value). We'll know what to expect size wise.
      * Then the resolveApduFile method can download any remaining bytes left.
      * @param fileID the ElementaryFileID that needs to be opened.
@@ -75,6 +75,11 @@ public abstract class ReaderApplication implements ReaderApplicationLayer {
     private Promise<byte[]> resolveApduFile(ApduFile file) {
         return new Promise<>(settlement -> {
             while (!file.isComplete()) {
+                try {
+                    chunkWaitingLock.acquire();
+                } catch (InterruptedException e) {
+                    Promise.reject(e);
+                }
                 short offset = file.getCurrentSize();
                 Promise<byte[]> promise = this.presentationLayer.readBinary(offset);
                 try {
@@ -83,17 +88,10 @@ public abstract class ReaderApplication implements ReaderApplicationLayer {
                 } catch (Throwable e) {
                     settlement.reject(e);
                 }
+                chunkWaitingLock.release();
             }
             settlement.resolve(file.getData());
+            getFileLock.release();
         });
-    }
-
-//    @Override
-//    public DedicatedFileID getAppId() {
-//        return this.appId;
-//    }
-
-    public void setAppId(DedicatedFileID id) {
-        this.appId = id;
     }
 }
