@@ -42,9 +42,7 @@ public class ReaderSession implements ReaderSessionLayer {
             return Promise.reject(new OutOfSequenceException());
         }
         Promise<ResponseApdu> p = commandToBytes(command).then(this::sendBytes);
-        p.always(() -> {
-            openRequestLock.release();
-        });
+        p.always(() -> openRequestLock.release());
         return p;
     }
 

@@ -14,6 +14,7 @@ import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
 import org.junit.Assert;
 import org.junit.Test;
 import java.io.IOException;
+import java.util.Base64;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.isA;
@@ -172,7 +173,7 @@ public class ReaderIntegrationTests extends IntegrationTests {
 
     @Test
     public void testConcurrentGetFile() throws Throwable {
-        byte[] expected = new byte[]{01, 02, 03, 07};
+        byte[] expected = new byte[]{(byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x07};
         assertTrue("Could not set file", holder.setLocalFile(ExampleApp.instance.ValidShortIdEF1, expected));
 
         //One thread asking for a file
@@ -191,6 +192,18 @@ public class ReaderIntegrationTests extends IntegrationTests {
 
         Assert.assertArrayEquals(expected, (byte[])p.getValue(1000));
         thread.join();
+    }
+
+    @Test
+    public void testImageFile() throws Throwable {
+        byte[] expected = ExampleApp.ImageFileDG6;
+        assertTrue("Could not set file", holder.setLocalFile(ExampleApp.instance.ValidNormalIdEF, expected));
+
+        for (int i = 1; i < 100;) {
+        Promise p = reader.readFile(ExampleApp.instance.ValidNormalIdEF);
+        Assert.assertArrayEquals("Expected equal our concatenated result", expected, (byte[]) p.getValue(1000));
+        i++;
+        }
     }
 
 }
