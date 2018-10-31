@@ -195,13 +195,13 @@ public class ReaderIntegrationTests extends IntegrationTests {
     }
 
     @Test
-    public void testImageFile() throws Throwable {
+    public void testLargeImageFileRepeatedly() throws Throwable {
         byte[] expected = ExampleApp.ImageFileDG6;
         assertTrue("Could not set file", holder.setLocalFile(ExampleApp.instance.ValidNormalIdEF, expected));
 
-        for (int i = 1; i < 50;) {
+        for (int i = 1; i < 1000;) {
         Promise p = reader.readFile(ExampleApp.instance.ValidNormalIdEF);
-        Assert.assertArrayEquals("Expected equal our concatenated result", expected, (byte[]) p.getValue(1000));
+        Assert.assertArrayEquals("Expected array equals our concatenated result", expected, (byte[]) p.getValue(1000));
         i++;
         }
     }

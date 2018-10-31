@@ -3,6 +3,7 @@ package com.ul.ims.apdu.interpreter;
 import com.ul.ims.apdu.interpreter.presentationLayer.*;
 import com.ul.ims.apdu.interpreter.sessionLayer.*;
 import com.ul.ims.apdu.interpreter.transportlayer.TransportLayerSimulator;
+import org.junit.AfterClass;
 import org.junit.Before;
 
 public class IntegrationTests {
