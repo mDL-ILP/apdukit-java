@@ -38,6 +38,7 @@ public class ReaderSession implements ReaderSessionLayer {
 
     @Override
     public synchronized Promise<ResponseApdu> send(CommandApdu command) {
+        System.out.println("New send command: " + command.toString());
         if(!openRequestLock.tryAcquire()) {//Only one command at a time.
             return Promise.reject(new OutOfSequenceException());
         }

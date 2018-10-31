@@ -199,7 +199,7 @@ public class ReaderIntegrationTests extends IntegrationTests {
         byte[] expected = ExampleApp.ImageFileDG6;
         assertTrue("Could not set file", holder.setLocalFile(ExampleApp.instance.ValidNormalIdEF, expected));
 
-        for (int i = 1; i < 100;) {
+        for (int i = 1; i < 50;) {
         Promise p = reader.readFile(ExampleApp.instance.ValidNormalIdEF);
         Assert.assertArrayEquals("Expected equal our concatenated result", expected, (byte[]) p.getValue(1000));
         i++;

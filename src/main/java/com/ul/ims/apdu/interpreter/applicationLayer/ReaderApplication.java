@@ -17,6 +17,7 @@ public abstract class ReaderApplication implements ReaderApplicationLayer {
     private ReaderPresentationLayer presentationLayer;
     //A lock so that we only get one file at a time.
     private Semaphore getFileLock = new Semaphore(1);
+    private Semaphore chunkWaitingLock = new Semaphore(1);
 
     public ReaderApplication(PresentationLayer presentationLayer, DedicatedFileID appId) {
         this.appId = appId;
@@ -75,14 +76,21 @@ public abstract class ReaderApplication implements ReaderApplicationLayer {
     private Promise<byte[]> resolveApduFile(ApduFile file) {
         return new Promise<>(settlement -> {
             while (!file.isComplete()) {
+                try {
+                    chunkWaitingLock.acquire();
+                } catch (InterruptedException e) {
+                    Promise.reject(e);
+                }
                 short offset = file.getCurrentSize();
                 Promise<byte[]> promise = this.presentationLayer.readBinary(offset);
                 try {
                     byte[] data = promise.getValue();
                     file.appendValue(data);
+                    System.out.println("Promise fulfilled");
                 } catch (Throwable e) {
                     settlement.reject(e);
                 }
+                chunkWaitingLock.release();
             }
             settlement.resolve(file.getData());
         });
