@@ -77,7 +77,7 @@ There are, of course, many more (Command) Apdus than are currently supported by 
 
 ## Some sequence diagrams
 
-![Happy flow using the ReadBinaryShortFileId command](https://github.com/mDL-ILP/apdukit-java/APDU.png)
+![Happy flow using the ReadBinaryShortFileId command](APDU.png)
 
 ## Installation
 
